@@ -1,4 +1,5 @@
 import "./App.css";
+// import Footer from "./global/navigation/Footer";
 
 function App() {
   return (
