@@ -1,4 +1,5 @@
 import "./App.css";
+import Footer from "./global/navigation/Footer";
 
 function App() {
   return (
@@ -7,6 +8,7 @@ function App() {
         <h1>BABI</h1>
         <p>프로젝트가 정상적으로 실행되었습니다.</p>
       </main>
+      <Footer />
     </div>
   );
 }

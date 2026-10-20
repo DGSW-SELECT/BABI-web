@@ -22,7 +22,7 @@ const FooterItem = ({
     onClick={onClick}
     aria-current={active ? "page" : undefined}
     aria-pressed={active}
-    className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
+    className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
       active
         ? "bg-[#eff6ff]"
         : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
@@ -182,7 +182,7 @@ export default function Footer() {
           aria-current={activeTab === "AI" ? "page" : undefined}
           aria-pressed={activeTab === "AI"}
           onClick={() => setActiveTab("AI")}
-          className={`flex h-14 min-w-0 flex-1 appearance-none items-start justify-center rounded-2xl border-0 pt-[5px] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
+          className={`flex h-14 min-w-0 flex-1 appearance-none items-start justify-center rounded-2xl border-0 pt-[5px] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
             activeTab === "AI"
               ? "bg-[#eff6ff]"
               : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
