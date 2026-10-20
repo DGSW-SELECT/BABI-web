@@ -9,35 +9,27 @@ type FooterItemProps = {
   label: string;
   icon: (props: IconProps) => ReactNode;
   active: boolean;
-  focused: boolean;
   onClick: () => void;
-  onFocus: () => void;
-  onBlur: () => void;
 };
 
 const FooterItem = ({
   label,
   icon,
   active,
-  focused,
   onClick,
-  onFocus,
-  onBlur,
 }: FooterItemProps) => (
   <button
     type="button"
     onClick={onClick}
-    onFocus={onFocus}
-    onBlur={onBlur}
     aria-current={active ? "page" : undefined}
     aria-pressed={active}
-    className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
+    className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
       active
         ? "bg-[#eff6ff]"
         : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
     }`}
   >
-    {icon({ filled: focused })}
+    {icon({ filled: active })}
     <span className="whitespace-nowrap text-[11px] font-bold leading-none tracking-[-0.08em]">
       {label}
     </span>
@@ -108,10 +100,16 @@ const CalendarIcon = ({ filled = false }: IconProps) => (
       strokeWidth="5.5"
     />
     <path
-      d="M17 4v10M39 4v10M6 21h44"
+      d="M17 4v10M39 4v10"
       stroke={filled ? "white" : NAV_ICON_COLOR}
       strokeWidth="5.5"
       strokeLinecap="round"
+    />
+    <path
+      d={filled ? "M3.25 21h49.5" : "M6 21h44"}
+      stroke={filled ? "white" : NAV_ICON_COLOR}
+      strokeWidth="5.5"
+      strokeLinecap="butt"
     />
     <circle cx="18" cy="31" r="3" fill={filled ? "white" : NAV_ICON_COLOR} />
     <circle cx="28" cy="31" r="3" fill={filled ? "white" : NAV_ICON_COLOR} />
@@ -219,7 +217,6 @@ export default function Footer() {
         <FooterItem
           label="캘린더"
           active={activeTab === "캘린더"}
-          focused={focusedTab === "캘린더"}
           icon={(props) => <CalendarIcon {...props} />}
           onClick={() => changeTab("캘린더")}
           onFocus={() => setFocusedTab("캘린더")}
