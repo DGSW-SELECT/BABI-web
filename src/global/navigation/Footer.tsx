@@ -156,9 +156,9 @@ const ProfileIcon = ({ filled = false }: IconProps) => (
   </svg>
 );
 
-export default function Footer() {
-  const [activeTab, setActiveTab] = useState<FooterTab>("홈");
-  const [focusedTab, setFocusedTab] = useState<FooterTab | null>("홈");
+export default function Footer({ initialTab = "홈" }: { initialTab?: FooterTab }) {
+  const [activeTab, setActiveTab] = useState<FooterTab>(initialTab);
+  const [focusedTab, setFocusedTab] = useState<FooterTab | null>(initialTab);
 
   return (
     <footer className="absolute inset-x-0 bottom-0 z-50 border-t border-[#edf0f3] bg-white px-3 pb-6 pt-1.5">

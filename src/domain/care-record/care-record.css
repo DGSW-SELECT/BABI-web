@@ -1,0 +1,348 @@
+@font-face {
+  font-family: "BABI Pretendard";
+  src: url("/record-assets/PretendardVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+.record-app {
+  font-family:
+    "BABI Pretendard", Pretendard, "Noto Sans KR", system-ui, sans-serif;
+  color: #000;
+  min-height: max(874px, 100svh);
+}
+.record-main {
+  padding: 60px 20px 126px;
+}
+.record-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+}
+.record-header h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 33.8px;
+  font-weight: 500;
+  letter-spacing: -0.7px;
+}
+.record-app button {
+  cursor: pointer;
+}
+.record-app button:focus-visible,
+.record-app input:focus-visible,
+.record-app textarea:focus-visible,
+.record-app select:focus-visible {
+  outline: 2px solid #7895bb;
+  outline-offset: 3px;
+}
+.record-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 11px 8px 25px 11px;
+}
+.record-filters button {
+  border-radius: 30px;
+  width: 55px;
+  height: 30px;
+  background: #e4e4e4;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.record-filters button:hover {
+  background: #d5d5d5;
+}
+.record-filters button.selected {
+  color: white;
+  background: #000;
+}
+.record-timeline {
+  --timeline-axis: 41px;
+  --timeline-line-width: 2px;
+  position: relative;
+  display: grid;
+  gap: 36px;
+  /* One continuous rail spans every record and the space between dates. */
+  background-image: linear-gradient(#c5ccd4, #c5ccd4);
+  background-position: calc(var(--timeline-axis) - var(--timeline-line-width) / 2) 0;
+  background-size: var(--timeline-line-width) 100%;
+  background-repeat: no-repeat;
+}
+.record-day {
+  position: relative;
+}
+.record-day h2 {
+  margin: 0 0 24px 78px;
+  color: #706b68;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+.record-day + .record-day h2 {
+  margin-bottom: 14px;
+}
+.record-day ul {
+  display: flex;
+  flex-direction: column;
+  gap: 33px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.record-entry {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  column-gap: 20px;
+  align-items: start;
+}
+.record-entry:first-child:has(.record-card-feed) {
+  margin-bottom: 4px;
+}
+.record-marker {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin-left: calc(var(--timeline-axis) - 20px);
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+}
+.record-marker-circle {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+}
+.record-marker-icon {
+  position: relative;
+}
+.record-marker-feed .record-marker-icon {
+  width: 22px;
+  height: 22px;
+}
+.record-marker-sleep .record-marker-icon {
+  width: 40px;
+  height: 40px;
+}
+.record-marker-temperature .record-marker-icon {
+  width: 16px;
+  height: 26px;
+}
+.record-marker-cry .record-marker-icon {
+  width: 20px;
+  height: 20px;
+}
+.record-card {
+  padding: 14px 16px;
+  border: 0.5px solid #777;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 17px;
+  line-height: 24px;
+  min-height: 100px;
+}
+.record-card-feed {
+  min-height: 115px;
+}
+.record-card-sleep {
+  min-height: 80px;
+}
+.record-card-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 6px;
+}
+.record-card-heading h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 400;
+}
+.record-card-heading > span {
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.record-card p {
+  margin: 0;
+}
+.record-card-feed > p {
+  margin-top: 4px;
+}
+.record-card .record-card-note {
+  color: #908a8a;
+  font-size: 15px;
+}
+.record-add-button {
+  position: absolute;
+  right: 26px;
+  bottom: 108px;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #ebeeff;
+  box-shadow: 0 4px 4.55px #3d3a3838;
+  transition: background 0.15s;
+}
+.record-add-button:hover {
+  background: #dde3ff;
+}
+.record-add-button img {
+  width: 14px;
+  height: 14px;
+}
+.record-add {
+  padding-bottom: 106px;
+}
+.record-add .record-header {
+  height: 54px;
+}
+.record-close {
+  position: absolute;
+  left: 12px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+.record-close:hover {
+  background: #e9edf2;
+}
+.record-close img {
+  width: 16.3313px;
+  height: 16.3409px;
+}
+.record-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  height: 50px;
+  margin: 10px 0 20px;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+  background: white;
+}
+.record-category-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  margin: -1px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--category-color);
+}
+.record-category-tabs button.selected {
+  background: color-mix(in srgb, var(--category-color) 10%, white);
+  border-color: var(--category-color);
+}
+.record-category-tabs button:hover {
+  background: color-mix(in srgb, var(--category-color) 7%, white);
+}
+.record-category-tabs img {
+  flex-shrink: 0;
+}
+
+.record-form {
+  padding: 20px;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+  background: white;
+}
+.record-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 22px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 19px;
+}
+.record-field input,
+.record-field select,
+.record-field textarea {
+  width: 100%;
+  min-width: 0;
+  height: 49px;
+  padding: 0 12px;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+  background: #fff;
+  color: #000;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.record-select-wrap {
+  position: relative;
+}
+.record-field select {
+  appearance: none;
+  padding-right: 36px;
+  color: #8a8f93;
+  cursor: pointer;
+}
+.record-select-wrap img {
+  position: absolute;
+  right: 13px;
+  top: 22px;
+  width: 11px;
+  height: 6px;
+  pointer-events: none;
+}
+.record-optional {
+  color: #8a8f93;
+}
+.record-field textarea {
+  height: 138px;
+  padding: 15px;
+  resize: vertical;
+}
+.record-field textarea::placeholder {
+  color: #8a8f93;
+  opacity: 1;
+}
+.record-memo {
+  margin-bottom: 22px;
+}
+.record-save {
+  width: 100%;
+  height: 50px;
+  border-radius: 16px;
+  background: #111;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+.record-save:hover {
+  background: #292929;
+}
+@media (max-width: 360px) {
+  .record-entry {
+    grid-template-columns: 60px minmax(0, 1fr);
+    column-gap: 10px;
+  }
+  .record-card {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .record-category-tabs button {
+    gap: 5px;
+    font-size: 16px;
+  }
+  .record-main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .record-form {
+    padding: 16px;
+  }
+}
