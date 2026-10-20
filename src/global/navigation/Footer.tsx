@@ -31,9 +31,7 @@ const FooterItem = ({
     aria-current={active ? "page" : undefined}
     aria-pressed={active}
     className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
-      active
-        ? "bg-[#eff6ff]"
-        : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
+      active ? "bg-[#eff6ff]" : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
     }`}
   >
     {icon({ filled: focused })}
