@@ -1,0 +1,190 @@
+/* BABI View 스타일 (폰 화면 프레임 버전). 클래스는 모두 babi- 접두사 */
+:root{--mint:#C9F5EC;--mint2:#7EE3CF;--blue:#D8EBFB;--blue2:#5B9BEA;--sub:#6B7280;--ink:#16181D;color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;color:var(--ink);font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo',sans-serif}
+#root{width:100%;max-width:none;margin:0;padding:0;border:0;text-align:initial;display:block;min-height:0}
+
+/* 폰 프레임 */
+.babi-stage{min-height:100svh;display:grid;place-items:center;padding:16px;background:#E9ECEF}
+.babi-phone{position:relative;width:402px;max-width:100%;height:min(874px,calc(100svh - 32px));min-height:640px;display:flex;flex-direction:column;overflow:hidden;background:#F5F5F5;color:var(--ink);font-size:16px;line-height:1.5;letter-spacing:normal;border-radius:44px;box-shadow:0 0 0 8px #16181D,0 20px 50px rgba(0,0,0,.25)}
+.babi-status{flex:none;height:44px;padding:14px 28px 0;display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:700;color:#111}
+.babi-status__icons{display:flex;gap:6px;align-items:center}
+.babi-home-indicator{flex:none;height:22px;display:grid;place-items:center;background:#fff}
+.babi-home-indicator::before{content:"";width:134px;height:5px;border-radius:3px;background:#111}
+@media (max-width:480px){
+  .babi-stage{padding:0;display:block;background:#F5F5F5}
+  .babi-phone{width:100%;height:100svh;min-height:0;border-radius:0;box-shadow:none}
+  .babi-status,.babi-home-indicator{display:none}
+}
+
+/* 헤더 */
+.babi-top{flex:none;display:flex;justify-content:space-between;align-items:center;padding:6px 20px 8px}
+.babi-icons{display:flex;gap:7px}
+.babi-imgbtn{display:block;padding:0;border:0;background:none;cursor:pointer;line-height:0}
+.babi-imgbtn img{display:block}
+.babi-imgbtn:focus-visible{outline:3px solid var(--blue2);outline-offset:2px;border-radius:24px}
+
+/* 본문 */
+.babi-main{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto}
+.babi-screen{flex:1 0 auto;width:100%;display:flex;flex-direction:column;align-items:center;padding:8px 20px 24px;text-align:center}
+.babi-screen--left{align-items:stretch;text-align:left}
+.babi-screen h2{font-family:inherit;color:var(--ink);font-size:26px;font-weight:900;line-height:1.3;letter-spacing:normal;margin:6px 0 4px}
+.babi-title-left{font-size:22px!important;margin-top:10px!important}
+.babi-hint{font-size:13px;color:var(--sub);margin:0}
+.babi-spacer{flex:1}
+.babi-mascot{display:block;height:auto;margin:14px 0 10px;flex:none;object-fit:contain}
+.babi-mic{width:96px;height:96px;display:grid;place-items:center;border-radius:50%;border:0;background:var(--mint);box-shadow:0 0 0 12px rgba(126,227,207,.28);cursor:pointer;margin:18px 0 12px;transition:transform .2s;flex:none;padding:0}
+.babi-mic.is-rec{background:#A5F3E8;transform:none;animation:babi-mic-glow 1.25s ease-in-out infinite}
+.babi-mic:focus,.babi-mic:focus-visible{outline:none}
+.babi-btn{width:100%;border:0;border-radius:10px;padding:14px;font-family:inherit;font-size:15px;font-weight:700;margin-top:8px;cursor:pointer;flex:none}
+.babi-btn:focus-visible,.babi-act__go:focus-visible{outline:3px solid var(--blue2);outline-offset:2px}
+.babi-btn:disabled{opacity:.6;cursor:default}
+.babi-btn--dark{background:#000;color:#fff}.babi-btn--grey{background:#D5D8DD;color:var(--ink)}
+.babi-note{width:100%;background:var(--blue);padding:24px 20px;text-align:left;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,.14);margin:16px 0 20px;position:relative}
+.babi-note::before{content:"";position:absolute;top:-13px;left:28px;width:14px;height:40px;border:3px solid #37699F;border-radius:9px;transform:rotate(-7deg);background:transparent}
+.babi-note b{display:block;font-size:17px;margin-bottom:10px}
+.babi-tags{display:flex;gap:6px;flex-wrap:wrap}.babi-tags span{background:#fff;border-radius:999px;padding:4px 10px;font-size:12px}
+.babi-wave{display:flex;gap:4px;align-items:center;height:40px;margin:6px 0}
+.babi-wave i{width:5px;border-radius:3px;background:var(--mint2);height:10px;animation:babi-w .9s ease-in-out infinite}
+@keyframes babi-w{50%{height:36px}}
+@keyframes babi-mic-glow{0%,100%{box-shadow:0 0 0 10px rgba(126,227,207,.25),0 0 12px 3px rgba(126,227,207,.45)}50%{box-shadow:0 0 0 20px rgba(126,227,207,.42),0 0 28px 8px rgba(126,227,207,.75)}}
+@media (prefers-reduced-motion:reduce){.babi-wave i{animation:none;height:22px}.babi-mic{transition:none}.babi-mic.is-rec{animation:none;box-shadow:0 0 0 15px rgba(126,227,207,.42)}}
+
+.babi-card{width:100%;background:#fff;border-radius:16px;padding:18px;text-align:left;margin-top:12px}
+.babi-card h3{font-family:inherit;color:var(--ink);font-size:15px;margin:0 0 10px;letter-spacing:normal}
+.babi-card--hero{background:var(--blue);text-align:center}
+.babi-bar{display:grid;grid-template-columns:56px 1fr 40px;align-items:center;gap:8px;font-size:14px;margin:10px 0}
+.babi-bar div{height:10px;background:#EAECEF;border-radius:6px;overflow:hidden}
+.babi-bar div i{display:block;height:100%;background:var(--blue2);border-radius:6px}
+.babi-bar:first-of-type div i{background:var(--mint2)}
+.babi-tips{margin:0;padding-left:18px;font-size:14px;line-height:1.8;list-style:decimal}
+.babi-warn{font-size:12px;color:var(--sub);margin:12px 0 0}
+.babi-error{font-size:13px;color:#D64545;margin:8px 0 0}
+.babi-result{width:100%}
+.babi-col{display:flex;flex-direction:column;align-items:center}
+.babi-hint.babi-error{color:#D64545}
+.babi-feature-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;color:#7895B4;font-size:13px;font-weight:700;text-decoration:none}
+.babi-feature-links{display:flex;flex-direction:column;align-items:center}
+.babi-feature-link span{font-size:19px;line-height:1}
+.babi-feature-link:focus-visible{outline:2px solid var(--blue2);outline-offset:3px;border-radius:4px}
+
+/* 녹음 중 화면: 참고 화면처럼 전체 배경을 회색으로 낮추고 안내 문구를 분리 */
+.babi-phone:has(.babi-screen--recording){background:#626262;color:#111}
+.babi-phone:has(.babi-screen--recording) .babi-status,
+.babi-phone:has(.babi-screen--recording) .babi-top,
+.babi-phone:has(.babi-screen--recording) .babi-main,
+.babi-phone:has(.babi-screen--recording) .babi-nav,
+.babi-phone:has(.babi-screen--recording) .babi-home-indicator{background:#626262}
+.babi-phone:has(.babi-screen--recording) .babi-nav{box-shadow:none}
+.babi-phone:has(.babi-screen--recording) .babi-top img{opacity:.42}
+.babi-phone:has(.babi-screen--recording) .babi-nav a img{filter:brightness(.25)}
+.babi-phone:has(.babi-screen--recording) .babi-nav a.is-cur{background:transparent}
+.babi-phone:has(.babi-screen--recording) .babi-home-indicator::before{background:#111}
+.babi-screen--recording{padding-top:22px}
+.babi-recording-mascot{position:relative;display:block;width:170px;flex:none;margin:34px 0 12px;line-height:0}
+.babi-recording-mascot .babi-mascot{display:block;width:100%!important;height:auto;margin:0;opacity:1;filter:none;image-rendering:auto}
+.babi-live-caption{margin:12px 0 0;color:#fff;font-size:17px;font-weight:600;line-height:1.5}
+.babi-screen--recording .babi-spacer{flex:1}
+.babi-screen--recording .babi-mic{margin-top:18px}
+.babi-screen--recording .babi-hint{color:rgba(255,255,255,.58)}
+.babi-screen--voice-idle .babi-spacer{flex:0 0 clamp(40px,9vh,76px)}
+.babi-screen--cry .babi-spacer{flex:0 0 clamp(40px,9vh,76px)}
+.babi-screen--voice-idle h2{font-size:30px;line-height:1.28}
+.babi-screen--voice-confirm .babi-note{width:100%;max-width:300px;min-height:210px;margin:12px 0 18px;padding:42px 20px 58px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#D7F1FA;border-radius:2px}
+.babi-screen--voice-confirm .babi-note b{font-size:17px;line-height:1.5;margin:0 0 10px}
+.babi-screen--voice-confirm .babi-tags{justify-content:center}
+.babi-note__mascot{position:absolute;right:10px;bottom:8px;width:48px!important;margin:0!important}
+.babi-screen--voice-confirm h2{font-size:30px;line-height:1.25;-webkit-text-stroke:4px #fff;paint-order:stroke fill;text-shadow:0 1px 1px rgba(0,0,0,.08)}
+
+/* 활동 추천 */
+.babi-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}
+.babi-stats div{background:#fff;border-radius:12px;padding:12px 0;font-size:12px;color:var(--sub)}
+.babi-stats b{display:block;color:var(--ink);font-size:17px;margin-top:2px}
+.babi-comment{display:flex;gap:10px;align-items:center;text-align:left;font-size:14px;line-height:1.5}
+.babi-comment .babi-mascot{margin:0;flex:none}
+.babi-act-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.babi-act{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:14px}
+.babi-act__ic{width:48px;height:48px;border-radius:14px;background:var(--blue);display:grid;place-items:center;font-size:24px;flex:none}
+.babi-act b{font-size:15px}.babi-act p{margin:2px 0 0;font-size:13px;color:var(--sub)}
+.babi-act__go{margin-left:auto;font-size:13px;background:#000;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-family:inherit;cursor:pointer}
+.babi-screen--left .babi-btn{align-self:stretch}
+.babi-screen--activity .babi-title-left{font-size:22px!important;line-height:1.25;margin:10px 0 4px!important}
+.babi-screen--activity>.babi-hint{font-size:13px;line-height:1.4}
+.babi-screen--activity .babi-stats{gap:8px;margin-top:16px}
+.babi-screen--activity .babi-stats>div{min-height:88px;display:flex;flex-direction:column;justify-content:center;border-radius:14px;padding:10px 4px;font-size:13px}
+.babi-screen--activity .babi-stats b{font-size:18px}
+.babi-stat--feeding{--stat-bg:#EFF6FB;--stat-border:#D5E7F4;--stat-accent:#6AA6D1}
+.babi-stat--sleep{--stat-bg:#F3EFF9;--stat-border:#DED1F0;--stat-accent:#9B7BC8}
+.babi-stat--temperature{--stat-bg:#EEF6F0;--stat-border:#D1E8D7;--stat-accent:#6FAF82}
+.babi-stat--cry{--stat-bg:#FFF3EE;--stat-border:#F5D9CE;--stat-accent:#D98E73}
+.babi-screen--activity .babi-stats .babi-stat{background:var(--stat-bg);border:1px solid var(--stat-border)}
+.babi-screen--activity .babi-stats .babi-stat b{color:var(--stat-accent)}
+.babi-screen--activity .babi-comment{min-height:100px;margin-top:14px;padding:14px 16px;border-radius:16px;background:#D9ECFC}
+.babi-screen--activity .babi-comment .babi-mascot{width:56px!important;height:auto}
+.babi-screen--activity .babi-act-grid{gap:10px;margin-top:12px}
+.babi-screen--activity .babi-act{min-height:80px;padding:12px 14px;border-radius:16px}
+.babi-screen--activity .babi-act__ic{width:48px;height:48px;border-radius:14px}
+.babi-screen--activity .babi-act__go{min-width:60px;min-height:40px;padding:8px 14px;border-radius:9px;font-size:14px}
+.babi-screen--activity>.babi-btn{min-height:54px;margin-top:10px}
+
+/* 기록관리 타임라인 */
+.babi-phone:has(.babi-screen--records) .babi-top{display:none}
+.babi-screen--records{padding:8px 24px 20px;overflow-y:auto}
+.babi-record-title{margin:8px 0 18px;font-size:22px;font-weight:800;line-height:1.35}
+.babi-record-filters{width:100%;display:flex;justify-content:space-between;gap:8px;overflow-x:auto;padding:0 0 4px;scrollbar-width:none}
+.babi-record-filters::-webkit-scrollbar{display:none}
+.babi-record-filters button{flex:none;min-width:54px;padding:7px 15px;border:0;border-radius:999px;background:#E6E6E6;color:#171717;font-family:inherit;font-size:14px;cursor:pointer}
+.babi-record-filters button.is-active{background:#080808;color:#fff}
+.babi-record-timeline{position:relative;width:100%;padding:24px 0 12px}
+.babi-record-day h2{margin:8px 0 14px;text-align:center;font-size:16px;font-weight:500;color:#898989}
+.babi-record-day__items{position:relative;display:flex;flex-direction:column;gap:18px}
+.babi-record-day__items::before{content:"";position:absolute;left:34px;top:22px;bottom:22px;width:1px;background:#D8D8D8}
+.babi-timeline-item{position:relative;display:grid;grid-template-columns:68px minmax(0,1fr);gap:10px;align-items:center;min-height:92px}
+.babi-timeline-item__icon{z-index:1;width:44px;height:44px;display:grid;place-items:center;justify-self:center;border:1.5px solid #7CA8B1;border-radius:50%;background:#F3FAFB;color:#111;font-size:25px;line-height:1}
+.babi-timeline-item--sleep .babi-timeline-item__icon{border-color:#C69CF6;background:#FAF6FF}
+.babi-timeline-item--temperature .babi-timeline-item__icon{border-color:#91C89B;background:#F5FBF5}
+.babi-timeline-item--cry .babi-timeline-item__icon{border-color:#F0D7CE;background:#FFF6F2;color:#111}
+.babi-timeline-item__card{position:relative;min-height:78px;padding:15px 16px 34px;border:1px solid #8B8B8B;border-radius:14px;background:#fff;text-align:left}
+.babi-timeline-item__card strong{display:block;margin-right:74px;font-size:15px;font-weight:500}
+.babi-timeline-item__card time{position:absolute;top:15px;right:15px;font-size:13px;white-space:nowrap}
+.babi-timeline-item__card p{margin:3px 0 0;font-size:15px;line-height:1.4}
+.babi-timeline-item__delete{position:absolute;right:14px;bottom:9px;padding:2px 5px;border:0;background:transparent;color:#8A8A8A;font:inherit;font-size:12px;cursor:pointer}
+.babi-timeline-item__delete:focus-visible{outline:2px solid var(--blue2);outline-offset:2px;border-radius:4px}
+.babi-screen--records .babi-record-empty{width:100%;margin-top:48px;text-align:center}
+.babi-record-empty p{margin:0 0 12px;color:var(--sub);font-size:14px}
+.babi-record-empty a{color:#7895B4;font-size:14px;font-weight:700;text-decoration:none}
+.babi-timeline-item__icon img{display:block;max-width:22px;max-height:26px;object-fit:contain}
+.babi-timeline-item--feeding .babi-timeline-item__icon img,.babi-timeline-item--sleep .babi-timeline-item__icon img{width:22px;height:22px}
+.babi-timeline-item--temperature .babi-timeline-item__icon img{width:16px;height:26px}
+.babi-record-add{position:absolute;z-index:3;right:26px;bottom:78px;width:58px;height:58px;border:0;border-radius:20px;background:#E9EBFF;color:#7895FF;box-shadow:0 4px 10px rgba(28,36,70,.18);font-size:34px;line-height:1;font-family:inherit;cursor:pointer}
+.babi-record-modal-backdrop{position:absolute;inset:0 0 82px;z-index:5;display:flex;align-items:stretch;padding:0;background:#F5F5F5}
+.babi-record-modal{width:100%;height:100%;max-height:none;overflow-y:auto;padding:8px 14px 16px;background:#F5F5F5;text-align:left}
+.babi-record-modal__status{height:30px;display:flex;justify-content:space-between;align-items:center;padding:0 8px;font-size:14px;font-weight:700;color:#111}
+.babi-record-modal__heading{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin:3px 0 18px}
+.babi-record-modal__heading h2{margin:0;text-align:center;font-size:25px;font-weight:800}
+.babi-record-modal__heading button{border:0;background:none;font-size:30px;line-height:1;cursor:pointer}
+.babi-record-modal__types{width:100%;display:flex;justify-content:space-between;gap:4px;overflow-x:auto;margin-bottom:16px;padding:2px;border:1px solid #ddd;border-radius:19px;background:#fff}
+.babi-record-modal__types button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;height:56px;padding:6px 4px;border:1px solid transparent;border-radius:15px;background:transparent;color:#888;font-size:14px;font-weight:700;font-family:inherit;white-space:nowrap;cursor:pointer}
+.babi-record-modal__types button img{width:21px;height:22px;object-fit:contain}
+.babi-record-modal__types .is-active.is-feeding{border-color:#72B8FA;background:#F3F9FF;color:#5A9FE0}
+.babi-record-modal__types .is-active.is-sleep{border-color:#B895EA;background:#FAF6FF;color:#9B7BC8}
+.babi-record-modal__types .is-active.is-temperature{border-color:#82C792;background:#F4FBF5;color:#65A878}
+.babi-record-modal__types .is-active.is-cry{border-color:#F0B49F;background:#FFF6F2;color:#D98E73}
+.babi-record-modal__types button.is-feeding{color:#69A9E0}.babi-record-modal__types button.is-sleep{color:#A885D3}.babi-record-modal__types button.is-temperature{color:#6DBB82}.babi-record-modal__types button.is-cry{color:#E99C83}
+.babi-record-form-card{width:100%;display:flex;flex-direction:column;gap:13px;padding:22px 20px 20px;border:1px solid #dedede;border-radius:20px;background:#fff}
+.babi-record-form-card>label{display:block;font-size:16px;font-weight:700;line-height:1.35}
+.babi-record-form-card>label span{color:#92989d;font-weight:600}
+.babi-record-form-card input,.babi-record-form-card select,.babi-record-form-card textarea{display:block;width:100%;height:58px;margin-top:9px;padding:12px 15px;border:1px solid #dedede;border-radius:17px;background:#fff;color:var(--ink);font-size:16px;font-family:inherit}
+.babi-record-form-card select{-webkit-appearance:none;appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center;background-size:16px 16px;line-height:1.4}
+.babi-record-form-card textarea{height:146px;resize:vertical}
+.babi-record-form-card>.babi-btn{height:60px;margin-top:2px;padding:12px;font-size:16px}
+
+/* 하단 푸터 네비게이션 */
+.babi-nav{flex:none;background:#fff;box-shadow:0 -2px 14px rgba(0,0,0,.05);padding:8px 8px 4px}
+.babi-nav ul{display:flex;justify-content:space-around;align-items:center;margin:0;padding:0;list-style:none}
+.babi-nav a{display:block;width:60px;height:50px;border-radius:14px;line-height:0;cursor:pointer;text-decoration:none}
+.babi-nav a img{display:block}
+.babi-nav a.is-cur{background:#F1F7FF}
+.babi-nav a.is-disabled{opacity:.55;cursor:default}
+.babi-nav a:focus-visible{outline:3px solid var(--blue2);outline-offset:2px}
+@media (max-width:480px){.babi-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}}

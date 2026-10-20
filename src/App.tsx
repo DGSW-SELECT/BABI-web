@@ -1,14 +1,24 @@
-import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import PageLayout from "./shared/components/PageLayout";
+import VoiceRecordView from "./domain/voice-record/VoiceRecordView";
+import CryAnalysisView from "./domain/cry-analysis/CryAnalysisView";
+import ActivityRecommendView from "./domain/activity-recommend/ActivityRecommendView";
+import CareRecordView from "./domain/care-record/CareRecordView";
+import "./shared/styles/babi.css";
 
-function App() {
+// /voice-record, /cry-analysis, /activity-recommend 각각 독립된 View 페이지
+export default function App() {
   return (
-    <div className="relative mx-auto min-h-[874px] w-full max-w-[402px] overflow-hidden bg-[#f8f9fa] pb-[96px] shadow-[0_0_24px_rgba(0,0,0,0.08)]">
-      <main className="px-5 pt-12 text-center text-slate-700">
-        <h1>BABI</h1>
-        <p>프로젝트가 정상적으로 실행되었습니다.</p>
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<PageLayout />}>
+          <Route path="/" element={<Navigate to="/voice-record" replace />} />
+          <Route path="/voice-record" element={<VoiceRecordView />} />
+          <Route path="/care-record" element={<CareRecordView />} />
+          <Route path="/cry-analysis" element={<CryAnalysisView />} />
+          <Route path="/activity-recommend" element={<ActivityRecommendView />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
