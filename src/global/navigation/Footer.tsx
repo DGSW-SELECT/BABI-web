@@ -8,35 +8,27 @@ type FooterItemProps = {
   label: string;
   icon: (props: IconProps) => ReactNode;
   active: boolean;
-  focused: boolean;
   onClick: () => void;
-  onFocus: () => void;
-  onBlur: () => void;
 };
 
 const FooterItem = ({
   label,
   icon,
   active,
-  focused,
   onClick,
-  onFocus,
-  onBlur,
 }: FooterItemProps) => (
   <button
     type="button"
     onClick={onClick}
-    onFocus={onFocus}
-    onBlur={onBlur}
     aria-current={active ? "page" : undefined}
     aria-pressed={active}
-    className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
+    className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
       active
         ? "bg-[#eff6ff]"
         : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
     }`}
   >
-    {icon({ filled: focused })}
+    {icon({ filled: active })}
     <span className="whitespace-nowrap text-[11px] font-bold leading-none tracking-[-0.08em]">
       {label}
     </span>
@@ -107,10 +99,16 @@ const CalendarIcon = ({ filled = false }: IconProps) => (
       strokeWidth="5.5"
     />
     <path
-      d="M17 4v10M39 4v10M6 21h44"
+      d="M17 4v10M39 4v10"
       stroke={filled ? "white" : NAV_ICON_COLOR}
       strokeWidth="5.5"
       strokeLinecap="round"
+    />
+    <path
+      d={filled ? "M3.25 21h49.5" : "M6 21h44"}
+      stroke={filled ? "white" : NAV_ICON_COLOR}
+      strokeWidth="5.5"
+      strokeLinecap="butt"
     />
     <circle cx="18" cy="31" r="3" fill={filled ? "white" : NAV_ICON_COLOR} />
     <circle cx="28" cy="31" r="3" fill={filled ? "white" : NAV_ICON_COLOR} />
@@ -158,7 +156,6 @@ const ProfileIcon = ({ filled = false }: IconProps) => (
 
 export default function Footer() {
   const [activeTab, setActiveTab] = useState<FooterTab>("홈");
-  const [focusedTab, setFocusedTab] = useState<FooterTab | null>("홈");
 
   return (
     <footer className="absolute inset-x-0 bottom-0 z-50 border-t border-[#edf0f3] bg-white px-3 pb-6 pt-1.5">
@@ -169,20 +166,14 @@ export default function Footer() {
         <FooterItem
           label="홈"
           active={activeTab === "홈"}
-          focused={focusedTab === "홈"}
           icon={(props) => <HomeIcon {...props} />}
           onClick={() => setActiveTab("홈")}
-          onFocus={() => setFocusedTab("홈")}
-          onBlur={() => setFocusedTab(null)}
         />
         <FooterItem
           label="기록"
           active={activeTab === "기록"}
-          focused={focusedTab === "기록"}
           icon={(props) => <RecordIcon {...props} />}
           onClick={() => setActiveTab("기록")}
-          onFocus={() => setFocusedTab("기록")}
-          onBlur={() => setFocusedTab(null)}
         />
 
         <button
@@ -191,9 +182,7 @@ export default function Footer() {
           aria-current={activeTab === "AI" ? "page" : undefined}
           aria-pressed={activeTab === "AI"}
           onClick={() => setActiveTab("AI")}
-          onFocus={() => setFocusedTab("AI")}
-          onBlur={() => setFocusedTab(null)}
-          className={`flex h-14 min-w-0 flex-1 appearance-none items-start justify-center rounded-2xl border-0 pt-[5px] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
+          className={`flex h-14 min-w-0 flex-1 appearance-none items-start justify-center rounded-2xl border-0 pt-[5px] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
             activeTab === "AI"
               ? "bg-[#eff6ff]"
               : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
@@ -209,20 +198,14 @@ export default function Footer() {
         <FooterItem
           label="캘린더"
           active={activeTab === "캘린더"}
-          focused={focusedTab === "캘린더"}
           icon={(props) => <CalendarIcon {...props} />}
           onClick={() => setActiveTab("캘린더")}
-          onFocus={() => setFocusedTab("캘린더")}
-          onBlur={() => setFocusedTab(null)}
         />
         <FooterItem
           label="마이페이지"
           active={activeTab === "마이페이지"}
-          focused={focusedTab === "마이페이지"}
           icon={(props) => <ProfileIcon {...props} />}
           onClick={() => setActiveTab("마이페이지")}
-          onFocus={() => setFocusedTab("마이페이지")}
-          onBlur={() => setFocusedTab(null)}
         />
       </nav>
     </footer>
