@@ -9,4 +9,10 @@
   font-family: "BabiAggro", sans-serif;
   font-weight: 500;
   letter-spacing: 0;
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
