@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 type FooterTab = "홈" | "기록" | "AI" | "캘린더" | "마이페이지";
 type IconProps = { filled?: boolean };
@@ -155,7 +156,17 @@ const ProfileIcon = ({ filled = false }: IconProps) => (
 );
 
 export default function Footer() {
-  const [activeTab, setActiveTab] = useState<FooterTab>("홈");
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [focusedTab, setFocusedTab] = useState<FooterTab | null>(null);
+  let activeTab: FooterTab | null = null;
+  if (pathname === "/ai-report") activeTab = "AI";
+  if (pathname === "/growth" || pathname.startsWith("/growth/")) activeTab = "캘린더";
+
+  function changeTab(tab: FooterTab) {
+    if (tab === "AI") navigate("/ai-report");
+    if (tab === "캘린더") navigate("/growth");
+  }
 
   return (
     <footer className="absolute inset-x-0 bottom-0 z-50 border-t border-[#edf0f3] bg-white px-3 pb-6 pt-1.5">
@@ -165,15 +176,21 @@ export default function Footer() {
       >
         <FooterItem
           label="홈"
-          active={activeTab === "홈"}
+          active={false}
+          focused={focusedTab === "홈"}
           icon={(props) => <HomeIcon {...props} />}
-          onClick={() => setActiveTab("홈")}
+          onClick={() => changeTab("홈")}
+          onFocus={() => setFocusedTab("홈")}
+          onBlur={() => setFocusedTab(null)}
         />
         <FooterItem
           label="기록"
-          active={activeTab === "기록"}
+          active={false}
+          focused={focusedTab === "기록"}
           icon={(props) => <RecordIcon {...props} />}
-          onClick={() => setActiveTab("기록")}
+          onClick={() => changeTab("기록")}
+          onFocus={() => setFocusedTab("기록")}
+          onBlur={() => setFocusedTab(null)}
         />
 
         <button
@@ -181,8 +198,10 @@ export default function Footer() {
           aria-label="BABI AI"
           aria-current={activeTab === "AI" ? "page" : undefined}
           aria-pressed={activeTab === "AI"}
-          onClick={() => setActiveTab("AI")}
-          className={`flex h-14 min-w-0 flex-1 appearance-none items-start justify-center rounded-2xl border-0 pt-[5px] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
+          onClick={() => changeTab("AI")}
+          onFocus={() => setFocusedTab("AI")}
+          onBlur={() => setFocusedTab(null)}
+          className={`flex h-14 min-w-0 flex-1 appearance-none items-start justify-center rounded-2xl border-0 pt-[5px] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus:bg-[#eff6ff] focus:outline-none focus-visible:outline-none ${
             activeTab === "AI"
               ? "bg-[#eff6ff]"
               : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
@@ -199,13 +218,18 @@ export default function Footer() {
           label="캘린더"
           active={activeTab === "캘린더"}
           icon={(props) => <CalendarIcon {...props} />}
-          onClick={() => setActiveTab("캘린더")}
+          onClick={() => changeTab("캘린더")}
+          onFocus={() => setFocusedTab("캘린더")}
+          onBlur={() => setFocusedTab(null)}
         />
         <FooterItem
           label="마이페이지"
-          active={activeTab === "마이페이지"}
+          active={false}
+          focused={focusedTab === "마이페이지"}
           icon={(props) => <ProfileIcon {...props} />}
-          onClick={() => setActiveTab("마이페이지")}
+          onClick={() => changeTab("마이페이지")}
+          onFocus={() => setFocusedTab("마이페이지")}
+          onBlur={() => setFocusedTab(null)}
         />
       </nav>
     </footer>
