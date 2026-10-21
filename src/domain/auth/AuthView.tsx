@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function GoogleLogo() {
   const parts = [
@@ -90,6 +90,24 @@ function Field({
 export function Verification({ onClose }: { onClose: () => void }) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const [digits, setDigits] = useState(Array<string>(6).fill(""));
+  const [remainingSeconds, setRemainingSeconds] = useState(120);
+  const [expiresAt, setExpiresAt] = useState(() => Date.now() + 120_000);
+
+  useEffect(() => {
+    const updateRemainingTime = () => {
+      const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      setRemainingSeconds(remaining);
+      if (remaining === 0) window.clearInterval(intervalId);
+    };
+    const intervalId = window.setInterval(updateRemainingTime, 1000);
+    document.addEventListener("visibilitychange", updateRemainingTime);
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", updateRemainingTime);
+    };
+  }, [expiresAt]);
+
+  const remainingTime = `${String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:${String(remainingSeconds % 60).padStart(2, "0")}`;
   return (
     <div
       className="absolute inset-0 z-50 bg-black/60"
@@ -167,7 +185,9 @@ export function Verification({ onClose }: { onClose: () => void }) {
             />
           ))}
         </div>
-        <p className="mt-9 text-[15px] leading-[18px] text-[#959292]">02:00</p>
+        <p role="timer" aria-label="인증번호 남은 시간" className="mt-9 text-[15px] leading-[18px] text-[#959292]">
+          {remainingTime}
+        </p>
         <button
           type="button"
           onClick={onClose}
@@ -179,6 +199,8 @@ export function Verification({ onClose }: { onClose: () => void }) {
           type="button"
           onClick={() => {
             setDigits(Array<string>(6).fill(""));
+            setRemainingSeconds(120);
+            setExpiresAt(Date.now() + 120_000);
             refs.current[0]?.focus();
           }}
           className="mt-8 text-[13px] text-[#393838] underline underline-offset-4"
@@ -254,10 +276,7 @@ export default function AuthView() {
           </p>
         ) : (
           <div className="mt-[15px] flex justify-between text-[13px] leading-[18px] text-[#868282]">
-            <button
-              type="button"
-              className="underline underline-offset-4"
-            >
+            <button type="button" className="underline underline-offset-4">
               비밀번호를 잊으셨나요?
             </button>
             <button
