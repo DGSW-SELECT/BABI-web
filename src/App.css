@@ -1,0 +1,18 @@
+@font-face {
+  font-family: "BabiAggro";
+  src: url("/auth/aggro-medium.woff") format("woff");
+  font-weight: 500;
+  font-display: swap;
+}
+
+.auth-wordmark {
+  font-family: "BabiAggro", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
