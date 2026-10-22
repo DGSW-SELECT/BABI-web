@@ -9,12 +9,28 @@
   font-family:
     "BABI Pretendard", Pretendard, "Noto Sans KR", system-ui, sans-serif;
   color: #000;
-  min-height: max(874px, 100svh);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 874px;
+  min-height: 0;
+  overflow: hidden;
+}
+.record-app > footer {
+  position: relative;
+  flex-shrink: 0;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
 }
 .record-main {
-  padding: 60px 20px 126px;
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: clamp(20px, 6.86dvh, 60px) 20px 0;
 }
 .record-header {
+  flex-shrink: 0;
   position: relative;
   display: flex;
   align-items: center;
@@ -33,12 +49,12 @@
 }
 .record-app button:focus-visible,
 .record-app input:focus-visible,
-.record-app textarea:focus-visible,
-.record-app select:focus-visible {
+.record-app textarea:focus-visible {
   outline: 2px solid #7895bb;
   outline-offset: 3px;
 }
 .record-filters {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -59,6 +75,29 @@
 .record-filters button.selected {
   color: white;
   background: #000;
+}
+.record-list-scroll,
+.record-form-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c5ccd4 transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.record-list-scroll {
+  padding-bottom: 100px;
+  scroll-padding-block: 16px 100px;
+}
+.record-list-scroll:focus-visible {
+  outline: 2px solid #7895bb;
+  outline-offset: -2px;
+}
+.record-form-scroll {
+  padding-bottom: 20px;
+  scroll-padding-block: 16px;
 }
 .record-timeline {
   --timeline-axis: 41px;
@@ -136,6 +175,7 @@
   height: 20px;
 }
 .record-card {
+  overflow-wrap: anywhere;
   padding: 14px 16px;
   border: 0.5px solid #777;
   border-radius: 10px;
@@ -178,7 +218,7 @@
 .record-add-button {
   position: absolute;
   right: 26px;
-  bottom: 108px;
+  bottom: 22px;
   display: grid;
   place-items: center;
   width: 56px;
@@ -196,7 +236,7 @@
   height: 14px;
 }
 .record-add {
-  padding-bottom: 106px;
+  padding-bottom: 0;
 }
 .record-add .record-header {
   height: 54px;
@@ -218,6 +258,7 @@
   height: 16.3409px;
 }
 .record-category-tabs {
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   height: 50px;
@@ -243,9 +284,6 @@
   background: color-mix(in srgb, var(--category-color) 10%, white);
   border-color: var(--category-color);
 }
-.record-category-tabs button:hover {
-  background: color-mix(in srgb, var(--category-color) 7%, white);
-}
 .record-category-tabs img {
   flex-shrink: 0;
 }
@@ -266,7 +304,6 @@
   line-height: 19px;
 }
 .record-field input,
-.record-field select,
 .record-field textarea {
   width: 100%;
   min-width: 0;
@@ -280,23 +317,6 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-}
-.record-select-wrap {
-  position: relative;
-}
-.record-field select {
-  appearance: none;
-  padding-right: 36px;
-  color: #8a8f93;
-  cursor: pointer;
-}
-.record-select-wrap img {
-  position: absolute;
-  right: 13px;
-  top: 22px;
-  width: 11px;
-  height: 6px;
-  pointer-events: none;
 }
 .record-optional {
   color: #8a8f93;

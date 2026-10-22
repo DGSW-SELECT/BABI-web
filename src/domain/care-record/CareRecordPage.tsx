@@ -1,5 +1,6 @@
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import Footer from "../../global/navigation/Footer";
+import { formatRecordDate, getRecordDateLabel, parseRecordDate } from "./record-date";
 import "./care-record.css";
 
 type Category = "수유" | "울음" | "수면" | "체온";
@@ -97,9 +98,16 @@ function RecordForm({ category, onSave }: { category: Category; onSave: (record:
       const selection = String(data.get("selection") ?? "").trim();
       const value = String(data.get("value") ?? "").trim();
       const memo = String(data.get("memo") ?? "").trim();
+      const date = parseRecordDate(String(data.get("date") ?? ""));
+      if (!date) {
+        const dateInput = event.currentTarget.elements.namedItem("date") as HTMLInputElement;
+        dateInput.setCustomValidity("올바른 날짜를 입력해주세요. 예: 2026. 10. 21 또는 2026-10-21");
+        dateInput.reportValidity();
+        return;
+      }
       onSave({
         id: crypto.randomUUID(),
-        date: String(data.get("date") ?? "").trim(),
+        date: formatRecordDate(date),
         category,
         title: category === "수유" || category === "수면" ? `${category} (${selection})` : category,
         value: category === "울음" ? selection : value,
@@ -110,16 +118,25 @@ function RecordForm({ category, onSave }: { category: Category; onSave: (record:
     }}>
       <label className="record-field">
         <span>{settings.label}</span>
-        <span className="record-select-wrap">
-          <select name="selection" aria-label={settings.label} defaultValue={settings.selection}>
-            <option>{settings.selection}</option>
-          </select>
-          <img src={asset("chevron")} alt="" />
-        </span>
+        <input
+          name="selection"
+          required
+          aria-label={settings.label}
+          type="text"
+          defaultValue={settings.selection}
+        />
       </label>
       <label className="record-field">
         <span>날짜</span>
-        <input name="date" required aria-label="날짜" type="text" defaultValue="2026. 09. 01 (화)" />
+        <input
+          name="date"
+          required
+          aria-label="날짜"
+          type="text"
+          defaultValue={formatRecordDate(new Date())}
+          placeholder="YYYY. MM. DD"
+          onInput={(event) => event.currentTarget.setCustomValidity("")}
+        />
       </label>
       <label className="record-field">
         <span>{settings.valueLabel}</span>
@@ -145,6 +162,7 @@ function RecordForm({ category, onSave }: { category: Category; onSave: (record:
 }
 
 export default function CareRecordPage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [records, setRecords] = useState<CareRecord[]>(initialRecords);
   const [filter, setFilter] = useState<Category | "전체">("전체");
   const [adding, setAdding] = useState(false);
@@ -152,6 +170,8 @@ export default function CareRecordPage() {
   const visibleRecords = records.filter(
     (record) => filter === "전체" || record.category === filter,
   );
+  const recordDates = Array.from(new Set(visibleRecords.map((record) => record.date)))
+    .sort((a, b) => (parseRecordDate(b)?.getTime() ?? 0) - (parseRecordDate(a)?.getTime() ?? 0));
 
   return (
     <div className="record-app relative mx-auto w-full max-w-[402px] bg-[#f8f9fa] shadow-[0_0_24px_rgba(0,0,0,0.08)]">
@@ -218,6 +238,7 @@ export default function CareRecordPage() {
             </div>
             <div
               id="record-form-panel"
+              className="record-form-scroll"
               role="tabpanel"
               aria-labelledby={`record-tab-${categories.find((item) => item.name === category)?.icon}`}
             >
@@ -227,7 +248,6 @@ export default function CareRecordPage() {
                     setRecords((previous) => [record, ...previous]);
                     setFilter("전체");
                     setAdding(false);
-                    window.scrollTo({ top: 0 });
                   }} />
                 </div>
               ))}
@@ -243,67 +263,72 @@ export default function CareRecordPage() {
                     type="button"
                     aria-pressed={filter === item}
                     className={filter === item ? "selected" : ""}
-                    onClick={() => setFilter(item)}
+                    onClick={() => {
+                      setFilter(item);
+                      scrollRef.current?.scrollTo({ top: 0 });
+                    }}
                   >
                     {item}
                   </button>
                 ),
               )}
             </nav>
-            <div className="record-timeline">
-              {Array.from(new Set(visibleRecords.map((record) => record.date))).map((date) => {
-                const group = visibleRecords.filter(
-                  (record) => record.date === date,
-                );
-                return (
-                  group.length > 0 && (
-                    <section
-                      className="record-day"
-                      key={date}
-                      aria-label={`${date} 기록`}
-                    >
-                      <h2>{date === "2026. 09. 01 (화)" ? "오늘 9월 1일" : date === "2026. 08. 31 (월)" ? "어제 8월 31일" : date}</h2>
-                      <ul>
-                        {group.map((record) => (
-                          <li className="record-entry" key={record.id}>
-                            <div
-                              className={`record-marker record-marker-${record.icon}`}
-                            >
-                              {record.icon !== "sleep" && (
+            <div className="record-list-scroll" ref={scrollRef} role="region" aria-label="기록 목록" tabIndex={0}>
+              <div className="record-timeline">
+                {recordDates.map((date) => {
+                  const group = visibleRecords.filter(
+                    (record) => record.date === date,
+                  );
+                  return (
+                    group.length > 0 && (
+                      <section
+                        className="record-day"
+                        key={date}
+                        aria-label={`${date} 기록`}
+                      >
+                        <h2>{getRecordDateLabel(date)}</h2>
+                        <ul>
+                          {group.map((record) => (
+                            <li className="record-entry" key={record.id}>
+                              <div
+                                className={`record-marker record-marker-${record.icon}`}
+                              >
+                                {record.icon !== "sleep" && (
+                                  <img
+                                    className="record-marker-circle"
+                                    src={asset(`${record.icon}-circle`)}
+                                    alt=""
+                                  />
+                                )}
                                 <img
-                                  className="record-marker-circle"
-                                  src={asset(`${record.icon}-circle`)}
+                                  className="record-marker-icon"
+                                  src={asset(`timeline-${record.icon}`)}
                                   alt=""
                                 />
-                              )}
-                              <img
-                                className="record-marker-icon"
-                                src={asset(`timeline-${record.icon}`)}
-                                alt=""
-                              />
-                            </div>
-                            <article
-                              className={`record-card record-card-${record.icon}`}
-                              aria-label={record.title}
-                            >
-                              <div className="record-card-heading">
-                                <h3>{record.title}</h3>
-                                <span>{record.time}</span>
                               </div>
-                              <p>{record.value}</p>
-                              {record.note && (
-                                <p className="record-card-note">
-                                  {record.note}
-                                </p>
-                              )}
-                            </article>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  )
-                );
-              })}
+                              <article
+                                className={`record-card record-card-${record.icon}`}
+                                aria-label={record.title}
+                              >
+                                <div className="record-card-heading">
+                                  <h3>{record.title}</h3>
+                                  <span>{record.time}</span>
+                                </div>
+                                <p>{record.value}</p>
+                                {record.note && (
+                                  <p className="record-card-note">
+                                    {record.note}
+                                  </p>
+                                )}
+                              </article>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    )
+                  );
+                })}
+              </div>
             </div>
             <button
               className="record-add-button"
