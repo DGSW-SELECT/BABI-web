@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { HashRouter, Link, Navigate, Route, Routes, useNavigate } from 'react-router'
 import AiReportPage from './domain/ai-report/AiReportPage'
 import GrowthPage from './domain/growth/GrowthPage'
+import CareRecordPage from './domain/care-record/CareRecordPage'
 import GrowthForm from './domain/growth/GrowthForm'
 import { growthRecords } from './domain/growth/growthData'
 import type { GrowthRecord } from './domain/growth/growthData'
@@ -41,6 +42,7 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<Navigate to="/ai-report" replace />} />
           <Route path="/ai-report" element={<AiReportPage />} />
+          <Route path="/care-record" element={<CareRecordPage onFinishEditing={finishEditing} />} />
           <Route path="/growth" element={<GrowthPage records={records} />} />
           <Route path="/growth/new" element={
             <GrowthForm onSave={addGrowthRecord} onClose={closeGrowthForm}

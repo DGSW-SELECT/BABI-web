@@ -12,14 +12,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: 874px;
   min-height: 0;
   overflow: hidden;
-}
-.record-app > footer {
-  position: relative;
-  flex-shrink: 0;
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
 }
 .record-main {
   position: relative;
@@ -88,7 +82,8 @@
   -webkit-overflow-scrolling: touch;
 }
 .record-list-scroll {
-  padding-bottom: 100px;
+  display: flex;
+  flex-direction: column;
   scroll-padding-block: 16px 100px;
 }
 .record-list-scroll:focus-visible {
@@ -104,8 +99,11 @@
   --timeline-line-width: 2px;
   position: relative;
   display: grid;
+  flex: 1 0 auto;
+  align-content: start;
   gap: 36px;
-  /* One continuous rail spans every record and the space between dates. */
+  padding-bottom: 100px;
+  /* Extend the rail through the final spacing and to the bottom of short lists. */
   background-image: linear-gradient(#c5ccd4, #c5ccd4);
   background-position: calc(var(--timeline-axis) - var(--timeline-line-width) / 2) 0;
   background-size: var(--timeline-line-width) 100%;
@@ -366,3 +364,6 @@
     padding: 16px;
   }
 }
+
+.record-card .record-card-author { margin-top: 6px; font-size: 12px; line-height: 18px; color: #718797; }
+.record-save-error { margin: 0 0 10px; flex-shrink: 0; color: #b43f35; font-size: 12px; line-height: 18px; }

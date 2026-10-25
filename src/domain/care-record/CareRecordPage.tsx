@@ -1,66 +1,16 @@
 import { useRef, useState, type CSSProperties } from "react";
-import Footer from "../../global/navigation/Footer";
+import { demoBaby, demoCaregivers } from "./care-record-data";
+import type { Category, CareRecordInput } from "./care-record-data";
+import { saveSharedCareRecord, useSharedCareRecords } from "./care-record-store";
 import { formatRecordDate, getRecordDateLabel, parseRecordDate } from "./record-date";
 import "./care-record.css";
 
-type Category = "수유" | "울음" | "수면" | "체온";
 const asset = (name: string) => `/record-assets/${name}.svg`;
 const categories: { name: Category; icon: string; color: string }[] = [
   { name: "수유", icon: "feed", color: "#5fa8e8" },
   { name: "울음", icon: "cry", color: "#ffb091" },
   { name: "수면", icon: "sleep", color: "#a88be8" },
   { name: "체온", icon: "temperature", color: "#72c58a" },
-];
-type CareRecord = {
-  id: string;
-  date: string;
-  category: Category;
-  title: string;
-  value: string;
-  time: string;
-  note?: string;
-  icon: string;
-};
-const initialRecords: CareRecord[] = [
-  {
-    id: "example-수유",
-    date: "2026. 09. 01 (화)",
-    category: "수유",
-    title: "수유 (분유)",
-    value: "120ml",
-    time: "오후 1:30",
-    note: "맛있게 잘먹음",
-    icon: "feed",
-  },
-  {
-    id: "example-수면",
-    date: "2026. 09. 01 (화)",
-    category: "수면",
-    title: "수면 (낮잠)",
-    value: "2시간 40분",
-    time: "오후 3:12",
-    icon: "sleep",
-  },
-  {
-    id: "example-체온",
-    date: "2026. 09. 01 (화)",
-    category: "체온",
-    title: "체온",
-    value: "36.5도",
-    time: "오후 5:19",
-    note: "오늘 기록 3회",
-    icon: "temperature",
-  },
-  {
-    id: "example-울음",
-    date: "2026. 08. 31 (월)",
-    category: "울음",
-    title: "울음",
-    value: "3회",
-    time: "오전 8:27",
-    note: "16분 동안",
-    icon: "cry",
-  },
 ];
 const fieldSettings = {
   수유: {
@@ -89,7 +39,7 @@ const fieldSettings = {
   },
 };
 
-function RecordForm({ category, onSave }: { category: Category; onSave: (record: CareRecord) => void }) {
+function RecordForm({ category, onSave }: { category: Category; onSave: (record: CareRecordInput) => void }) {
   const settings = fieldSettings[category];
   return (
     <form className="record-form" onSubmit={(event) => {
@@ -154,27 +104,29 @@ function RecordForm({ category, onSave }: { category: Category; onSave: (record:
         </span>
         <textarea name="memo" aria-label="메모 (선택)" placeholder="메모를 입력하세요" />
       </label>
-      <button className="record-save" type="submit">
+      <button className="record-save" type="submit" onPointerDown={(event) => event.preventDefault()}>
         기록저장
       </button>
     </form>
   );
 }
 
-export default function CareRecordPage() {
+export default function CareRecordPage({ onFinishEditing }: { onFinishEditing: () => void }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [records, setRecords] = useState<CareRecord[]>(initialRecords);
+  const records = useSharedCareRecords();
+  const [saveError, setSaveError] = useState("");
+  const caregiver = demoCaregivers[0];
   const [filter, setFilter] = useState<Category | "전체">("전체");
   const [adding, setAdding] = useState(false);
   const [category, setCategory] = useState<Category>("수유");
   const visibleRecords = records.filter(
-    (record) => filter === "전체" || record.category === filter,
-  );
+    (record) => record.babyId === demoBaby.babyId && (filter === "전체" || record.category === filter),
+  ).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
   const recordDates = Array.from(new Set(visibleRecords.map((record) => record.date)))
     .sort((a, b) => (parseRecordDate(b)?.getTime() ?? 0) - (parseRecordDate(a)?.getTime() ?? 0));
 
   return (
-    <div className="record-app relative mx-auto w-full max-w-[402px] bg-[#f8f9fa] shadow-[0_0_24px_rgba(0,0,0,0.08)]">
+    <div className="record-app relative w-full bg-[#f8f9fa]">
       <main className={adding ? "record-main record-add" : "record-main"}>
         <header className="record-header">
           {adding && (
@@ -182,13 +134,15 @@ export default function CareRecordPage() {
               className="record-close"
               type="button"
               aria-label="기록 추가 닫기"
-              onClick={() => setAdding(false)}
+              onClick={() => { onFinishEditing(); setAdding(false); setSaveError(""); }}
             >
               <img src={asset("close")} alt="" />
             </button>
           )}
           <h1>{adding ? "기록 추가" : "기록관리"}</h1>
         </header>
+        <p className="sr-only">{demoBaby.name}의 공동 기록 · 모든 보호자의 기록을 함께 조회합니다.</p>
+        {saveError && <p role="alert" className="record-save-error">{saveError}</p>}
         {adding ? (
           <>
             <div
@@ -239,15 +193,22 @@ export default function CareRecordPage() {
             <div
               id="record-form-panel"
               className="record-form-scroll"
+              data-input-scroll-container
               role="tabpanel"
               aria-labelledby={`record-tab-${categories.find((item) => item.name === category)?.icon}`}
             >
               {categories.map((item) => (
                 <div key={item.name} hidden={category !== item.name}>
                   <RecordForm category={item.name} onSave={(record) => {
-                    setRecords((previous) => [record, ...previous]);
-                    setFilter("전체");
-                    setAdding(false);
+                    try {
+                      saveSharedCareRecord({ ...record, babyId: demoBaby.babyId, authorId: caregiver.id, createdAt: new Date().toISOString() });
+                      onFinishEditing();
+                      setFilter("전체");
+                      setAdding(false);
+                      setSaveError("");
+                    } catch {
+                      setSaveError("기록을 저장하지 못했어요. 입력 내용을 확인한 뒤 다시 시도해주세요. 입력한 내용은 유지돼요.");
+                    }
                   }} />
                 </div>
               ))}
@@ -315,6 +276,7 @@ export default function CareRecordPage() {
                                   <span>{record.time}</span>
                                 </div>
                                 <p>{record.value}</p>
+                                <p className="record-card-author">작성자 · {demoCaregivers.find((member) => member.id === record.authorId)?.name ?? "보호자"}</p>
                                 {record.note && (
                                   <p className="record-card-note">
                                     {record.note}
@@ -344,7 +306,6 @@ export default function CareRecordPage() {
           </>
         )}
       </main>
-      <Footer initialTab="기록" />
     </div>
   );
 }
