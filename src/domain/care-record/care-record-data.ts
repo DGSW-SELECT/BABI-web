@@ -66,7 +66,10 @@ export const initialRecords: CareRecord[] = [
   },
 ];
 
-export type CareRecordInput = Omit<CareRecord, "babyId" | "authorId" | "createdAt">;
+export type CareRecordInput = Omit<
+  CareRecord,
+  "babyId" | "authorId" | "createdAt"
+>;
 
 export const demoBaby = { babyId: 1, name: "지민이" };
 export const demoCaregivers = [

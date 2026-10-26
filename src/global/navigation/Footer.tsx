@@ -12,21 +12,14 @@ type FooterItemProps = {
   onClick: () => void;
 };
 
-const FooterItem = ({
-  label,
-  icon,
-  active,
-  onClick,
-}: FooterItemProps) => (
+const FooterItem = ({ label, icon, active, onClick }: FooterItemProps) => (
   <button
     type="button"
     onClick={onClick}
     aria-current={active ? "page" : undefined}
     aria-pressed={active}
     className={`flex h-14 min-w-0 flex-1 appearance-none flex-col items-center justify-center gap-1 rounded-2xl border-0 text-[#7895bb] outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${
-      active
-        ? "bg-[#eff6ff]"
-        : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
+      active ? "bg-[#eff6ff]" : "hover:bg-[#f3f8ff] active:bg-[#e8f3ff]"
     }`}
   >
     {icon({ filled: active })}
@@ -161,7 +154,8 @@ export default function Footer() {
   let activeTab: FooterTab | null = null;
   if (pathname === "/care-record") activeTab = "기록";
   if (pathname === "/ai-report") activeTab = "AI";
-  if (pathname === "/growth" || pathname.startsWith("/growth/")) activeTab = "캘린더";
+  if (pathname === "/growth" || pathname.startsWith("/growth/"))
+    activeTab = "캘린더";
 
   function changeTab(tab: FooterTab) {
     if (tab === "기록") navigate("/care-record");
