@@ -1,7 +1,7 @@
 import Mascot from "../../shared/components/Mascot";
 import MicIcon from "../../shared/components/MicIcon";
 import { useState, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import useRecorder from "../../shared/utils/useRecorder";
 import { parseVoiceRecord, saveVoiceRecord } from "./api";
 import type { ParsedVoiceRecord } from "./types";
