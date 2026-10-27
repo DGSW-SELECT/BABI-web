@@ -1,0 +1,63 @@
+.family-view button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.family-view button:focus-visible {
+  outline: 2px solid #5fa8e8;
+  outline-offset: 3px;
+}
+.family-view .family-primary {
+  color: #fff;
+}
+.family-input {
+  height: 54px;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  background: white;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #4a3d3c;
+  outline: none;
+}
+.family-input:focus {
+  border-color: #5fa8e8;
+  box-shadow: 0 0 0 2px #5fa8e81a;
+}
+.family-input::placeholder {
+  color: #a7b1b5;
+}
+.family-member-dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  max-width: 402px;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+.family-member-dialog[open] {
+  display: flex;
+  align-items: flex-end;
+}
+.family-member-dialog::backdrop {
+  background: transparent;
+}
+.family-member-sheet {
+  max-height: 95dvh;
+  overflow-y: auto;
+}
+.family-member-sheet button {
+  cursor: pointer;
+}
+.family-member-sheet button:focus-visible {
+  outline: 2px solid #5fa8e8;
+  outline-offset: 3px;
+}
+.family-member-sheet .family-input {
+  height: 49px;
+  font-size: 13px;
+}

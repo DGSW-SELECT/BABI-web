@@ -153,12 +153,14 @@ export default function Footer() {
   const { pathname } = useLocation();
   let activeTab: FooterTab | null = null;
   if (pathname === "/care-record") activeTab = "기록";
+  if (pathname === "/family") activeTab = "마이페이지";
   if (pathname === "/ai-report") activeTab = "AI";
   if (pathname === "/growth" || pathname.startsWith("/growth/"))
     activeTab = "캘린더";
 
   function changeTab(tab: FooterTab) {
     if (tab === "기록") navigate("/care-record");
+    if (tab === "마이페이지") navigate("/family");
     if (tab === "AI") navigate("/ai-report");
     if (tab === "캘린더") navigate("/growth");
   }
@@ -209,7 +211,7 @@ export default function Footer() {
         />
         <FooterItem
           label="마이페이지"
-          active={false}
+          active={activeTab === "마이페이지"}
           icon={(props) => <ProfileIcon {...props} />}
           onClick={() => changeTab("마이페이지")}
         />
