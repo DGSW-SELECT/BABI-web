@@ -27,7 +27,7 @@ function BabyIcon() {
 function HeaderAction({ label, children, onClick, unread = false }: {
   label: string; children: ReactNode; onClick?: () => void; unread?: boolean
 }) {
-  return <button type="button" disabled={!onClick} onClick={onClick} aria-label={onClick ? label : `${label} (연결 전)`} aria-haspopup={label === '메시지' ? undefined : 'dialog'}
+  return <button type="button" disabled={!onClick} onClick={onClick} aria-label={onClick ? label : `${label} (연결 전)`} aria-haspopup="dialog"
     className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-[#a5b2b7] text-white enabled:cursor-pointer enabled:hover:bg-[#8c9fa7] focus:outline-none focus-visible:bg-[#718e9b]">
     {children}{unread && <span aria-hidden="true" className="absolute top-0 right-0 size-2 rounded-full border border-[#f7f8f9] bg-[#399fff]" />}
   </button>
@@ -38,10 +38,10 @@ type HeaderProps = {
   babies?: HeaderBaby[]
   notifications?: HeaderNotification[]
   onBabyChange?: (babyId: number) => void
-  onMessages?: () => void
+  onHandoff?: () => void
 }
 
-export default function Header({ baby, babies = [baby], notifications = [], onBabyChange, onMessages }: HeaderProps) {
+export default function Header({ baby, babies = [baby], notifications = [], onBabyChange, onHandoff }: HeaderProps) {
   const [panel, setPanel] = useState<'notifications' | 'baby' | null>(null)
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set())
   const hasUnread = notifications.some((item) => !item.isRead && !readIds.has(item.id))
@@ -51,7 +51,7 @@ export default function Header({ baby, babies = [baby], notifications = [], onBa
       <header className="flex shrink-0 items-center justify-between gap-3 px-8 pt-9 [@media(max-height:760px)]:pt-6 max-[360px]:px-5">
         <BabySwitcher baby={baby} babies={babies} onBabyChange={onBabyChange} avatar={<BabyIcon />} />
         <div className="flex shrink-0 gap-[7px] max-[360px]:gap-1">
-          <HeaderAction label="메시지" onClick={onMessages}><svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11s4.5 8 10 8h3l5 3v-6c1.3-1.4 2-3.2 2-5 0-4.4-4.5-8-10-8Z" /><g fill="#a5b2b7"><circle cx="7" cy="11" r="1" /><circle cx="12" cy="11" r="1" /><circle cx="17" cy="11" r="1" /></g></svg></HeaderAction>
+          <HeaderAction label="인수인계" onClick={onHandoff}><svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11s4.5 8 10 8h3l5 3v-6c1.3-1.4 2-3.2 2-5 0-4.4-4.5-8-10-8Z" /><g fill="#a5b2b7"><circle cx="7" cy="11" r="1" /><circle cx="12" cy="11" r="1" /><circle cx="17" cy="11" r="1" /></g></svg></HeaderAction>
           <HeaderAction label="알림" unread={hasUnread} onClick={() => setPanel('notifications')}><svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M5 16V9a7 7 0 0 1 14 0v7l2 3H3ZM9 20h6a3 3 0 0 1-6 0Z" /></svg></HeaderAction>
           <HeaderAction label="아기 정보" onClick={() => setPanel('baby')}><BabyIcon /></HeaderAction>
         </div>
