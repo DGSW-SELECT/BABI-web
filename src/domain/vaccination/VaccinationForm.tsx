@@ -48,13 +48,13 @@ export default function VaccinationForm({ schedules, schedule, onSave, onClose }
     })
   }
 
-  const fieldClass = 'min-h-12 w-full min-w-0 rounded-2xl border border-[#d6d6d6] bg-white px-3 text-sm outline-none focus-visible:outline-2 focus-visible:outline-[#aa83ff]'
+  const fieldClass = 'min-h-12 w-full min-w-0 rounded-2xl border border-[#d6d6d6] bg-white px-3 text-base outline-none focus-visible:outline-2 focus-visible:outline-[#aa83ff]'
 
   return (
-    <main className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
+    <main className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <header className="relative z-10 flex min-h-14 shrink-0 items-center justify-center bg-[#f7f8f9] px-5">
         <button type="button" onClick={onClose} aria-label="예방접종 일정으로 돌아가기"
-          className="absolute left-[10px] flex size-8 cursor-pointer items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-[#aa83ff]">
+          className="absolute left-2.5 flex size-11 cursor-pointer items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-[#aa83ff]">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="m4 4 16 16M20 4 4 20" /></svg>
         </button>
         <h1 className="text-[22px] font-bold">{schedule ? '접종 일정 수정' : '기록 추가'}</h1>
@@ -94,7 +94,7 @@ export default function VaccinationForm({ schedules, schedule, onSave, onClose }
             <input id={`${formId}-date`} type="date" value={scheduledDate} required
               onInput={(event) => { setScheduledDate(event.currentTarget.value); setErrors({ ...errors, date: undefined }) }}
               aria-invalid={Boolean(errors.date)} aria-describedby={errors.date ? `${formId}-date-error` : undefined}
-              className={`${fieldClass} cursor-pointer text-base`} />
+              className={`${fieldClass} cursor-pointer`} />
             {errors.date && <p id={`${formId}-date-error`} role="alert" className="mt-1 text-xs text-red-700">{errors.date}</p>}
           </div>
           {schedule?.completed && <div>
@@ -102,7 +102,7 @@ export default function VaccinationForm({ schedules, schedule, onSave, onClose }
             <input id={`${formId}-completed-date`} type="date" value={completedDate} required max={getToday()}
               onInput={(event) => { setCompletedDate(event.currentTarget.value); setErrors({ ...errors, completedDate: undefined }) }}
               aria-invalid={Boolean(errors.completedDate)} aria-describedby={errors.completedDate ? `${formId}-completed-date-error` : undefined}
-              className={`${fieldClass} cursor-pointer text-base`} />
+              className={`${fieldClass} cursor-pointer`} />
             {errors.completedDate && <p id={`${formId}-completed-date-error`} role="alert" className="mt-1 text-xs text-red-700">{errors.completedDate}</p>}
           </div>}
           <div>
