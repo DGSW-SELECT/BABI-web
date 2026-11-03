@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import GrowthTabs from './GrowthTabs'
+import CalendarTabs from '../../global/navigation/CalendarTabs'
 import { growthLabels, growthTypes } from './growthData'
 import type { GrowthRecord, GrowthType } from './growthData'
 
@@ -23,7 +23,7 @@ export default function GrowthPage({ records }: GrowthPageProps) {
         <h1 className="text-[22px] font-bold">캘린더</h1>
       </header>
       <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pt-3 pb-6 max-[360px]:px-3">
-        <GrowthTabs />
+        <CalendarTabs />
         <section className="rounded-[17px] border border-[#63c980] bg-[#ecf5ef] px-5 pt-[18px] pb-5 max-[360px]:px-3" aria-label="한눈에 보기">
           <h2 className="mb-3 pl-[9px] text-base font-bold">한눈에 보기</h2>
           <div className="grid grid-cols-2 gap-5 max-[360px]:gap-3">

@@ -156,7 +156,10 @@ export default function Footer() {
   if (pathname === "/care-record") activeTab = "기록";
   if (pathname === "/family") activeTab = "마이페이지";
   if (pathname === "/ai-report") activeTab = "AI";
-  if (pathname === "/growth" || pathname.startsWith("/growth/"))
+  if (
+    pathname === "/growth" || pathname.startsWith("/growth/") ||
+    pathname === "/vaccination" || pathname.startsWith("/vaccination/")
+  )
     activeTab = "캘린더";
 
   function changeTab(tab: FooterTab) {

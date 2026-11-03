@@ -11,6 +11,11 @@
   letter-spacing: 0;
 }
 
+.page-title-header {
+  flex-shrink: 0;
+  padding-top: max(60px, calc(env(safe-area-inset-top, 0px) + 12px));
+}
+
 html,
 body,
 #root {
