@@ -19,6 +19,10 @@ import VaccinationPage from "./domain/vaccination/VaccinationPage";
 import VaccinationForm from "./domain/vaccination/VaccinationForm";
 import { createVaccinationSchedules } from "./domain/vaccination/vaccinationData";
 import type { VaccinationSchedule } from "./domain/vaccination/vaccinationData";
+import SchedulePage from "./domain/schedule/SchedulePage";
+import ScheduleForm from "./domain/schedule/ScheduleForm";
+import { createSchedules, getDateKey } from "./domain/schedule/scheduleData";
+import type { Schedule } from "./domain/schedule/scheduleData";
 import Footer from "./global/navigation/Footer";
 import { useInputViewport } from "./shared/hooks/useInputViewport";
 import "./App.css";
@@ -38,6 +42,8 @@ function AppLayout() {
   const [records, setRecords] = useState<GrowthRecord[]>(growthRecords);
   const [vaccinations, setVaccinations] =
     useState<VaccinationSchedule[]>(createVaccinationSchedules);
+  const [schedules, setSchedules] = useState<Schedule[]>(createSchedules);
+  const [selectedDate, setSelectedDate] = useState(getDateKey);
   const { height, offsetTop, isEditing, finishEditing } =
     useInputViewport(containerRef);
 
@@ -82,6 +88,21 @@ function AppLayout() {
     );
   }
 
+  function closeScheduleForm() {
+    finishEditing();
+    navigate("/schedule", { replace: true });
+  }
+
+  function addSchedule(schedule: Schedule) {
+    setSchedules((previous) => [...previous, schedule]);
+    setSelectedDate(schedule.date);
+    closeScheduleForm();
+  }
+
+  function deleteSchedule(id: number) {
+    setSchedules((previous) => previous.filter((item) => item.id !== id));
+  }
+
   return (
     <div
       ref={containerRef}
@@ -96,6 +117,29 @@ function AppLayout() {
           <Route
             path="/care-record"
             element={<CareRecordPage onFinishEditing={finishEditing} />}
+          />
+          <Route
+            path="/schedule"
+            element={
+              <SchedulePage
+                schedules={schedules}
+                records={records}
+                vaccinations={vaccinations}
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+                onDelete={deleteSchedule}
+              />
+            }
+          />
+          <Route
+            path="/schedule/new"
+            element={
+              <ScheduleForm
+                date={selectedDate}
+                onSave={addSchedule}
+                onClose={closeScheduleForm}
+              />
+            }
           />
           <Route path="/growth" element={<GrowthPage records={records} />} />
           <Route

@@ -33,9 +33,7 @@ export default function CalendarTabs() {
           className={`flex min-h-12 items-center justify-center gap-[7px] rounded-2xl border px-[2px] py-2 text-base leading-normal font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#256b3c] max-[360px]:gap-1 max-[360px]:text-sm ${tab.colorClassName} ${
             tab.key === selectedTab ? tab.selectedClassName : 'border-transparent bg-transparent'
           }`}
-          aria-current={tab.key === selectedTab ? 'page' : undefined}
-          aria-label={tab.key === 'schedule' ? '일정 (준비 중)' : undefined}
-          disabled={tab.key === 'schedule'}>
+          aria-current={tab.key === selectedTab ? 'page' : undefined}>
           <CalendarTabIcon tab={tab.key} />
           {tab.label}
         </button>

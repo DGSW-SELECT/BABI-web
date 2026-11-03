@@ -157,6 +157,7 @@ export default function Footer() {
   if (pathname === "/family") activeTab = "마이페이지";
   if (pathname === "/ai-report") activeTab = "AI";
   if (
+    pathname === "/schedule" || pathname.startsWith("/schedule/") ||
     pathname === "/growth" || pathname.startsWith("/growth/") ||
     pathname === "/vaccination" || pathname.startsWith("/vaccination/")
   )
@@ -167,7 +168,7 @@ export default function Footer() {
     if (tab === "기록") navigate("/care-record");
     if (tab === "마이페이지") navigate("/family");
     if (tab === "AI") navigate("/ai-report");
-    if (tab === "캘린더") navigate("/growth");
+    if (tab === "캘린더") navigate("/schedule");
   }
 
   return (
