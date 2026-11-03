@@ -17,6 +17,7 @@ import type { GrowthRecord } from "./domain/growth/growthData";
 import Footer from "./global/navigation/Footer";
 import { useInputViewport } from "./shared/hooks/useInputViewport";
 import "./App.css";
+import "./shared/styles/babi.css";
 
 export default function App() {
   return (

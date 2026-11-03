@@ -15,7 +15,6 @@ export default function ActivityRecommendView({ onStartActivity }: Props) {
 
   useEffect(() => {
     let alive = true;
-    setApiError(null);
     fetchRecommendations(page)
       .then((d) => alive && setData(d))
       .catch((e) => alive && setApiError(e instanceof Error ? e.message : "문제가 생겼어요. 다시 시도해주세요."));
@@ -28,7 +27,7 @@ export default function ActivityRecommendView({ onStartActivity }: Props) {
         {apiError ? (
           <>
             <p className="babi-error" role="alert">{apiError}</p>
-            <button className="babi-btn babi-btn--dark" onClick={() => setRetry((n) => n + 1)}>다시 시도</button>
+            <button className="babi-btn babi-btn--dark" onClick={() => { setApiError(null); setRetry((n) => n + 1); }}>다시 시도</button>
           </>
         ) : (
           <p className="babi-hint">불러오는 중…</p>
@@ -69,7 +68,7 @@ export default function ActivityRecommendView({ onStartActivity }: Props) {
       ))}
       </div>
 
-      <button className="babi-btn babi-btn--grey" onClick={() => setPage((p) => p + 1)}>
+      <button className="babi-btn babi-btn--grey" onClick={() => { setApiError(null); setPage((p) => p + 1); }}>
         다른 활동 추천받기
       </button>
     </section>
