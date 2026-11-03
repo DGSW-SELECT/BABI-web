@@ -10,6 +10,7 @@ import {
 import AiReportPage from "./domain/ai-report/AiReportPage";
 import GrowthPage from "./domain/growth/GrowthPage";
 import CareRecordPage from "./domain/care-record/CareRecordPage";
+import VoiceRecordView from "./domain/voice-record/VoiceRecordView";
 import GrowthForm from "./domain/growth/GrowthForm";
 import { growthRecords } from "./domain/growth/growthData";
 import type { GrowthRecord } from "./domain/growth/growthData";
@@ -50,7 +51,8 @@ function AppLayout() {
     >
       <div className="min-h-0 flex-1 overflow-hidden">
         <Routes>
-          <Route path="/" element={<Navigate to="/ai-report" replace />} />
+          <Route path="/" element={<Navigate to="/voice-record" replace />} />
+          <Route path="/voice-record" element={<VoiceRecordView />} />
           <Route path="/ai-report" element={<AiReportPage />} />
           <Route
             path="/care-record"

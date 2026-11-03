@@ -152,6 +152,7 @@ export default function Footer() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   let activeTab: FooterTab | null = null;
+  if (pathname === "/voice-record") activeTab = "홈";
   if (pathname === "/care-record") activeTab = "기록";
   if (pathname === "/family") activeTab = "마이페이지";
   if (pathname === "/ai-report") activeTab = "AI";
@@ -159,6 +160,7 @@ export default function Footer() {
     activeTab = "캘린더";
 
   function changeTab(tab: FooterTab) {
+    if (tab === "홈") navigate("/voice-record");
     if (tab === "기록") navigate("/care-record");
     if (tab === "마이페이지") navigate("/family");
     if (tab === "AI") navigate("/ai-report");
@@ -173,7 +175,7 @@ export default function Footer() {
       >
         <FooterItem
           label="홈"
-          active={false}
+          active={activeTab === "홈"}
           icon={(props) => <HomeIcon {...props} />}
           onClick={() => changeTab("홈")}
         />
