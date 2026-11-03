@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import Header from '../../global/navigation/header/Header'
 import Modal from '../../shared/components/Modal'
-import { aiReportBaby, aiReportComment, aiReportData, aiReportDate, aiReportNotifications } from './aiReportData'
+import { aiReportBaby, aiReportComment, aiReportData, aiReportDate } from './aiReportData'
 import type { AiReportItem, AiReportType } from './aiReportData'
 
 const cardColors = {
@@ -17,7 +16,6 @@ export default function AiReportPage() {
 
   return (
     <main aria-label={`${aiReportBaby.name} ${aiReportDate} AI 육아 리포트`} className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-[#101010]">
-      <Header baby={aiReportBaby} notifications={aiReportNotifications} />
       <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-[30px] pb-8 max-[360px]:px-5">
         <h1 className="mt-10 text-center text-[22px] leading-[31px] font-medium tracking-[-0.5px] [@media(max-height:760px)]:mt-6">BABI의 육아 리포트</h1>
         <div className="mt-[38px] grid grid-cols-2 gap-x-[14px] gap-y-5 [@media(max-height:760px)]:mt-6">

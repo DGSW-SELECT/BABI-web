@@ -5,6 +5,7 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
   useNavigate,
   useParams,
 } from "react-router";
@@ -23,6 +24,9 @@ import SchedulePage from "./domain/schedule/SchedulePage";
 import ScheduleForm from "./domain/schedule/ScheduleForm";
 import { createSchedules, getDateKey } from "./domain/schedule/scheduleData";
 import type { Schedule } from "./domain/schedule/scheduleData";
+import HandoffDialog from "./domain/handoff/HandoffDialog";
+import { aiReportBaby, aiReportNotifications } from "./domain/ai-report/aiReportData";
+import Header from "./global/navigation/header/Header";
 import Footer from "./global/navigation/Footer";
 import { useInputViewport } from "./shared/hooks/useInputViewport";
 import "./App.css";
@@ -39,11 +43,15 @@ export default function App() {
 function AppLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [records, setRecords] = useState<GrowthRecord[]>(growthRecords);
   const [vaccinations, setVaccinations] =
     useState<VaccinationSchedule[]>(createVaccinationSchedules);
   const [schedules, setSchedules] = useState<Schedule[]>(createSchedules);
   const [selectedDate, setSelectedDate] = useState(getDateKey);
+  const [showHandoff, setShowHandoff] = useState(false);
+  const [handoffMemo, setHandoffMemo] = useState("");
+  const showHeader = pathname === "/voice-record" || pathname === "/ai-report";
   const { height, offsetTop, isEditing, finishEditing } =
     useInputViewport(containerRef);
 
@@ -103,12 +111,29 @@ function AppLayout() {
     setSchedules((previous) => previous.filter((item) => item.id !== id));
   }
 
+  function closeHandoff() {
+    finishEditing();
+    setShowHandoff(false);
+  }
+
+  function saveHandoff(memo: string) {
+    setHandoffMemo(memo);
+    closeHandoff();
+  }
+
   return (
     <div
       ref={containerRef}
       className="fixed right-0 left-0 mx-auto flex w-full max-w-[402px] flex-col overflow-hidden bg-[#f7f8f9] shadow-[0_0_24px_rgba(0,0,0,0.08)]"
       style={{ top: offsetTop, height: height || "100dvh" }}
     >
+      <div className={showHeader ? "shrink-0" : "hidden"}>
+        <Header
+          baby={aiReportBaby}
+          notifications={aiReportNotifications}
+          onHandoff={() => setShowHandoff(true)}
+        />
+      </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         <Routes>
           <Route path="/" element={<Navigate to="/voice-record" replace />} />
@@ -202,6 +227,15 @@ function AppLayout() {
         <div className="relative h-[87px] shrink-0">
           <Footer />
         </div>
+      )}
+      {showHandoff && (
+        <HandoffDialog
+          memo={handoffMemo}
+          onSave={saveHandoff}
+          onClose={closeHandoff}
+          height={height}
+          offsetTop={offsetTop}
+        />
       )}
     </div>
   );
