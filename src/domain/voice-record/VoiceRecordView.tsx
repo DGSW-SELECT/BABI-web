@@ -43,8 +43,6 @@ export default function VoiceRecordView({ onGoRecords }: Props) {
     if (!parsed) return;
     try {
       await saveVoiceRecord(parsed);
-      const savedRecords = JSON.parse(localStorage.getItem("babi-voice-records") ?? "[]") as Array<ParsedVoiceRecord & { savedAt: string }>;
-      localStorage.setItem("babi-voice-records", JSON.stringify([{ ...parsed, savedAt: new Date().toISOString() }, ...savedRecords]));
       setStep("done");
     } catch (e) {
       setApiError(e instanceof Error ? e.message : "문제가 생겼어요. 다시 시도해주세요.");
@@ -54,8 +52,9 @@ export default function VoiceRecordView({ onGoRecords }: Props) {
   const showMic = step === "idle" || step === "recording";
 
   return (
-    <section className={`babi-screen babi-screen--voice ${step === "idle" ? "babi-screen--voice-idle" : ""} ${step === "recording" ? "babi-screen--recording" : ""} ${step === "confirm" ? "babi-screen--voice-confirm" : ""}`}>
+    <main className="babi-voice-shell flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-[#101010]">
       <Header baby={{ babyId: 1, name: "지민이" }} />
+      <section className={`babi-screen babi-screen--voice ${step === "idle" ? "babi-screen--voice-idle" : ""} ${step === "recording" ? "babi-screen--recording" : ""} ${step === "confirm" ? "babi-screen--voice-confirm" : ""}`}>
 
       {(step === "idle" || step === "done" || step === "analyzing") && (
         <Mascot />
@@ -117,6 +116,7 @@ export default function VoiceRecordView({ onGoRecords }: Props) {
           </p>
         </>
       )}
-    </section>
+      </section>
+    </main>
   );
 }
