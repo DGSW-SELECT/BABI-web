@@ -18,7 +18,7 @@ export default function GrowthPage({ records }: GrowthPageProps) {
   }
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
+    <main className="calendar-tab-page flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
       <div className="page-title-header" aria-hidden="true" />
       <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pt-3 pb-6 max-[360px]:px-3">
         <CalendarTabs />

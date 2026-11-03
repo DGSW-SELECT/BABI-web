@@ -1,0 +1,53 @@
+.calendar-tab-page {
+  view-transition-name: calendar-page;
+}
+
+:root[data-calendar-tab-direction='next'] {
+  --calendar-page-enter-x: 28px;
+  --calendar-page-exit-x: -28px;
+}
+
+:root[data-calendar-tab-direction='previous'] {
+  --calendar-page-enter-x: -28px;
+  --calendar-page-exit-x: 28px;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(calendar-selected-tab) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(calendar-page) {
+  animation: 280ms cubic-bezier(0.4, 0, 0.2, 1) both calendar-page-out;
+}
+
+::view-transition-new(calendar-page) {
+  animation: 280ms cubic-bezier(0.4, 0, 0.2, 1) both calendar-page-in;
+}
+
+@keyframes calendar-page-out {
+  to {
+    opacity: 0;
+    transform: translateX(var(--calendar-page-exit-x, -28px));
+  }
+}
+
+@keyframes calendar-page-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--calendar-page-enter-x, 28px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(calendar-selected-tab),
+  ::view-transition-old(calendar-page),
+  ::view-transition-new(calendar-page) {
+    animation-duration: 0.01ms;
+  }
+}
