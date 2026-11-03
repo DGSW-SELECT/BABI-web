@@ -6,6 +6,7 @@ import {
   Route,
   Routes,
   useNavigate,
+  useParams,
 } from "react-router";
 import AiReportPage from "./domain/ai-report/AiReportPage";
 import GrowthPage from "./domain/growth/GrowthPage";
@@ -14,6 +15,10 @@ import VoiceRecordView from "./domain/voice-record/VoiceRecordView";
 import GrowthForm from "./domain/growth/GrowthForm";
 import { growthRecords } from "./domain/growth/growthData";
 import type { GrowthRecord } from "./domain/growth/growthData";
+import VaccinationPage from "./domain/vaccination/VaccinationPage";
+import VaccinationForm from "./domain/vaccination/VaccinationForm";
+import { createVaccinationSchedules } from "./domain/vaccination/vaccinationData";
+import type { VaccinationSchedule } from "./domain/vaccination/vaccinationData";
 import Footer from "./global/navigation/Footer";
 import { useInputViewport } from "./shared/hooks/useInputViewport";
 import "./App.css";
@@ -30,6 +35,8 @@ function AppLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [records, setRecords] = useState<GrowthRecord[]>(growthRecords);
+  const [vaccinations, setVaccinations] =
+    useState<VaccinationSchedule[]>(createVaccinationSchedules);
   const { height, offsetTop, isEditing, finishEditing } =
     useInputViewport(containerRef);
 
@@ -41,6 +48,37 @@ function AppLayout() {
   function addGrowthRecord(record: GrowthRecord) {
     setRecords((oldRecords) => [...oldRecords, record]);
     closeGrowthForm();
+  }
+
+  function closeVaccinationForm() {
+    finishEditing();
+    navigate("/vaccination", { replace: true });
+  }
+
+  function addVaccination(schedule: VaccinationSchedule) {
+    setVaccinations((previous) => [...previous, schedule]);
+    closeVaccinationForm();
+  }
+
+  function updateVaccination(schedule: VaccinationSchedule) {
+    setVaccinations((previous) =>
+      previous.map((item) =>
+        item.vaccinationScheduleId === schedule.vaccinationScheduleId
+          ? schedule
+          : item,
+      ),
+    );
+    closeVaccinationForm();
+  }
+
+  function changeVaccinationStatus(id: number, completedDate: string | null) {
+    setVaccinations((previous) =>
+      previous.map((item) =>
+        item.vaccinationScheduleId === id
+          ? { ...item, completedDate, completed: completedDate !== null }
+          : item,
+      ),
+    );
   }
 
   return (
@@ -71,6 +109,35 @@ function AppLayout() {
             }
           />
           <Route
+            path="/vaccination"
+            element={
+              <VaccinationPage
+                schedules={vaccinations}
+                onChangeStatus={changeVaccinationStatus}
+              />
+            }
+          />
+          <Route
+            path="/vaccination/new"
+            element={
+              <VaccinationForm
+                schedules={vaccinations}
+                onSave={addVaccination}
+                onClose={closeVaccinationForm}
+              />
+            }
+          />
+          <Route
+            path="/vaccination/:scheduleId/edit"
+            element={
+              <VaccinationEditPage
+                schedules={vaccinations}
+                onSave={updateVaccination}
+                onClose={closeVaccinationForm}
+              />
+            }
+          />
+          <Route
             path="*"
             element={
               <main className="flex h-full flex-col items-center justify-center gap-4 px-5 text-center text-[#43545e]">
@@ -92,5 +159,30 @@ function AppLayout() {
         </div>
       )}
     </div>
+  );
+}
+
+function VaccinationEditPage({
+  schedules,
+  onSave,
+  onClose,
+}: {
+  schedules: VaccinationSchedule[];
+  onSave: (schedule: VaccinationSchedule) => void;
+  onClose: () => void;
+}) {
+  const { scheduleId } = useParams();
+  const schedule = schedules.find(
+    (item) => String(item.vaccinationScheduleId) === scheduleId,
+  );
+  if (!schedule) return <Navigate to="/vaccination" replace />;
+  return (
+    <VaccinationForm
+      key={schedule.vaccinationScheduleId}
+      schedule={schedule}
+      schedules={schedules}
+      onSave={onSave}
+      onClose={onClose}
+    />
   );
 }
