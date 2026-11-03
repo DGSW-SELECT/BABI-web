@@ -1,3 +1,13 @@
+.babi-header {
+  padding-top: max(36px, calc(env(safe-area-inset-top, 0px) + 12px));
+}
+
+@media (max-height: 760px) {
+  .babi-header {
+    padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+  }
+}
+
 .babi-baby-menu {
   opacity: 0;
   visibility: hidden;

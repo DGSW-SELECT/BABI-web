@@ -19,9 +19,7 @@ export default function GrowthPage({ records }: GrowthPageProps) {
 
   return (
     <main className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
-      <header className="flex min-h-14 shrink-0 items-center justify-center">
-        <h1 className="text-[22px] font-bold">캘린더</h1>
-      </header>
+      <div className="page-title-header" aria-hidden="true" />
       <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pt-3 pb-6 max-[360px]:px-3">
         <CalendarTabs />
         <section className="rounded-[17px] border border-[#63c980] bg-[#ecf5ef] px-5 pt-[18px] pb-5 max-[360px]:px-3" aria-label="한눈에 보기">
@@ -91,9 +89,14 @@ function GrowthChart({ records, selectedType }: { records: GrowthRecord[]; selec
     return `${String(Math.floor(month / 12)).slice(-2)}.${month % 12 + 1}`
   }
 
+  // 상세창으로 포인터나 포커스를 옮겨도 선택한 기록을 유지합니다.
   return (
     <div ref={chartRef} aria-label={`${name} 성장 기록 그래프`} role="group"
       className="[&_.recharts-line-dot]:cursor-pointer [&_g]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-[#63c980]"
+      onMouseEnter={(event) => event.stopPropagation()}
+      onBlurCapture={(event) => {
+        if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) event.stopPropagation()
+      }}
       onKeyDown={(event) => {
         if (event.key === 'Escape') setShowTooltip(false)
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') setShowTooltip(true)
@@ -121,8 +124,13 @@ function GrowthChart({ records, selectedType }: { records: GrowthRecord[]; selec
 }
 
 function GrowthTooltip({ record, onClose }: { record: GrowthRecord; onClose: () => void }) {
+  const navigate = useNavigate()
   return (
-    <div role="dialog" aria-label={`${record.date} 성장 기록`} className="w-[220px] max-w-[calc(100vw_-_80px)] rounded-2xl border border-[#badfc5] bg-white p-3 text-xs text-[#121212] shadow-[0_5px_20px_rgba(24,74,40,0.16)]">
+    <div role="dialog" aria-label={`${record.date} 성장 기록`}
+      onMouseMove={(event) => event.stopPropagation()}
+      onTouchMove={(event) => event.stopPropagation()}
+      onTouchEnd={(event) => event.stopPropagation()}
+      className="w-[220px] max-w-[calc(100vw_-_80px)] rounded-2xl border border-[#badfc5] bg-white p-3 text-xs text-[#121212] shadow-[0_5px_20px_rgba(24,74,40,0.16)]">
       <div className="mb-2 flex items-center justify-between gap-1">
         <h3 className="font-bold">{record.date.replaceAll('-', '. ')} 기록</h3>
         <button type="button" aria-label="기록 상세 닫기" onClick={(event) => { event.stopPropagation(); onClose() }}
@@ -134,6 +142,8 @@ function GrowthTooltip({ record, onClose }: { record: GrowthRecord; onClose: () 
       </dl>
       <p className="mt-2 font-semibold">메모</p>
       <p className="mt-1 max-h-20 overflow-y-auto overscroll-contain whitespace-pre-wrap wrap-anywhere text-[#657169]">{record.memo?.trim() || '메모 없음'}</p>
+      <button type="button" onClick={(event) => { event.stopPropagation(); navigate(`/growth/${record.id}/edit`) }}
+        className="mt-3 min-h-9 w-full cursor-pointer rounded-xl bg-[#121212] text-xs font-medium text-white hover:bg-[#292929] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#63c980]">수정하기</button>
     </div>
   )
 }
@@ -143,13 +153,13 @@ function sortGrowthRecords(records: GrowthRecord[]) {
 }
 
 function getGrowthSummary(records: GrowthRecord[], type: GrowthType) {
-  const sorted = sortGrowthRecords(records)
+  // 키는 키 기록끼리, 몸무게는 몸무게 기록끼리 최근 두 건을 비교합니다.
+  const sorted = sortGrowthRecords(records).filter((record) => typeof record[type] === 'number' && Number.isFinite(record[type]))
   const current = sorted.at(-1)
   const previous = sorted.at(-2)
-  const latest = sorted.findLast((record) => typeof record[type] === 'number')
-  const value = latest?.[type]
-  let change = sorted.length === 1 ? '이전 기록 없음' : '비교 데이터 없음'
-  if (current && latest?.id === current.id && value !== undefined && previous?.[type] !== undefined) {
+  const value = current?.[type]
+  let change = current ? '이전 기록 없음' : '비교 데이터 없음'
+  if (current && value !== undefined && previous?.[type] !== undefined) {
     const difference = Number((value - previous[type]).toFixed(2))
     const days = (Date.parse(current.date) - Date.parse(previous.date)) / 86400000
     change = `${difference >= 0 ? '+' : ''}${difference.toFixed(1)}${growthLabels[type].unit} (${days}일)`

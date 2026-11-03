@@ -67,6 +67,13 @@ function AppLayout() {
     closeGrowthForm();
   }
 
+  function updateGrowthRecord(record: GrowthRecord) {
+    setRecords((previous) =>
+      previous.map((item) => item.id === record.id ? record : item),
+    );
+    closeGrowthForm();
+  }
+
   function closeVaccinationForm() {
     finishEditing();
     navigate("/vaccination", { replace: true });
@@ -177,8 +184,16 @@ function AppLayout() {
               <GrowthForm
                 onSave={addGrowthRecord}
                 onClose={closeGrowthForm}
-                isEditing={isEditing}
-                onFinishEditing={finishEditing}
+              />
+            }
+          />
+          <Route
+            path="/growth/:recordId/edit"
+            element={
+              <GrowthEditPage
+                records={records}
+                onSave={updateGrowthRecord}
+                onClose={closeGrowthForm}
               />
             }
           />
@@ -242,6 +257,28 @@ function AppLayout() {
         />
       )}
     </div>
+  );
+}
+
+function GrowthEditPage({
+  records,
+  onSave,
+  onClose,
+}: {
+  records: GrowthRecord[];
+  onSave: (record: GrowthRecord) => void;
+  onClose: () => void;
+}) {
+  const { recordId } = useParams();
+  const record = records.find((item) => String(item.id) === recordId);
+  if (!record) return <Navigate to="/growth" replace />;
+  return (
+    <GrowthForm
+      key={record.id}
+      record={record}
+      onSave={onSave}
+      onClose={onClose}
+    />
   );
 }
 

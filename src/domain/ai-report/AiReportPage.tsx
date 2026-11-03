@@ -21,14 +21,12 @@ export default function AiReportPage() {
         <div className="mt-[38px] grid grid-cols-2 gap-x-[14px] gap-y-5 [@media(max-height:760px)]:mt-6">
           {aiReportData.map((report) => <AiReportCard key={report.type} report={report} onClick={() => setSelectedType(report.type)} />)}
         </div>
-        <section aria-label="BABI의 한마디" className="mt-[49px] grid min-h-[145px] grid-cols-[minmax(0,1fr)_105px] items-center gap-1 rounded-[17px] border border-[#d6d6d6] bg-white px-5 py-4 max-[360px]:grid-cols-[minmax(0,1fr)_88px] max-[360px]:px-3 [@media(max-height:760px)]:mt-7">
+        <section aria-label="BABI의 한마디" className="mt-7 grid min-h-[145px] grid-cols-[minmax(0,1fr)_96px] items-center gap-4 rounded-[17px] border border-[#d6d6d6] bg-white px-4 py-4 max-[360px]:grid-cols-[minmax(0,1fr)_76px] max-[360px]:gap-3 max-[360px]:px-3">
           <div className="min-w-0">
-            <h2 className="text-center text-base font-medium text-[#399fff]">BABI의 한마디</h2>
-            <p className="relative mt-2 rounded-[32px] bg-[#f7f8f9] px-2 py-2 text-center text-xs leading-6 whitespace-pre-line wrap-anywhere after:absolute after:top-3 after:-right-1 after:size-4 after:rotate-45 after:bg-[#f7f8f9]">
-              <span className="relative z-10">{aiReportComment}</span>
-            </p>
+            <h2 className="text-center text-base leading-6 font-medium text-[#399fff] max-[360px]:text-sm">BABI의 한마디</h2>
+            <p className="relative mt-2 rounded-[32px] bg-[#f7f8f9] px-3 py-2 text-center text-xs leading-6 whitespace-pre-line break-keep after:absolute after:top-1/2 after:-right-2 after:-translate-y-1/2 after:border-y-[7px] after:border-l-[12px] after:border-y-transparent after:border-l-[#f7f8f9] max-[360px]:px-2 max-[360px]:text-[11px] max-[360px]:leading-5">{aiReportComment}</p>
           </div>
-          <img src="/ai-report-mascot.svg" alt="BABI 코끼리 캐릭터" width="105" height="115" className="relative z-10 h-[115px] w-full object-contain" />
+          <img src="/ai-report-mascot.svg" alt="BABI 코끼리 캐릭터" width="96" height="115" className="h-[115px] w-full object-contain max-[360px]:h-24" />
         </section>
       </div>
       {selectedReport && <AiReportDetailModal report={selectedReport} onClose={() => setSelectedType(null)} />}
@@ -68,23 +66,22 @@ function AiReportDetailModal({ report, onClose }: { report: AiReportItem; onClos
   return (
     <Modal title={`${report.name} 상세 정보`} subtitle={`${aiReportBaby.name} · ${aiReportDate.replaceAll('-', '. ')}`} onClose={onClose}
       icon={<span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${style.background} ${style.text}`}><AiReportIcon type={report.type} size={27} /></span>}>
-      <section aria-label="핵심 수치" className={`rounded-[22px] p-4 ${style.background}`}>
+      <section aria-label="핵심 수치" className={`rounded-[17px] border-0 p-4 ${cardColors[report.type]}`}>
         <dl className="grid grid-cols-[minmax(0,1fr)_84px] gap-3">
           <div>
-            <dt className="text-xs text-[#607684]">{style.label}</dt>
-            <dd className={`mt-1 text-[30px] leading-10 font-bold tracking-tight ${style.text}`}>{report.value}</dd>
+            <dt className="text-xs font-medium text-[#777777]">{style.label}</dt>
+            <dd className="mt-1.5 text-2xl leading-8 font-semibold text-[#101010]">{report.value}</dd>
+            <dd className="mt-2 text-xs leading-5 text-[#777777]">{report.detail}</dd>
           </div>
-          <div className="border-l border-white/80 pl-4">
-            <dt className="text-xs text-[#607684]">기록 횟수</dt>
-            <dd className="mt-2 text-2xl font-bold text-[#334f60]">{report.records.length}회</dd>
+          <div className="flex flex-col justify-center border-l border-[#d6d6d6] text-center">
+            <dt className="text-xs font-medium text-[#777777]">기록 횟수</dt>
+            <dd className="mt-1.5 text-xl leading-7 font-medium text-[#101010]">{report.records.length}회</dd>
           </div>
         </dl>
-        <p className="mt-2 text-xs leading-5 text-[#607684]">{report.detail}</p>
       </section>
       <section aria-label="BABI 피드백" className="mt-4 rounded-[22px] border border-[#d7e8f6] bg-[#f4f9ff] p-4">
         <div className="flex items-center gap-2">
           <h3 className="shrink-0 text-sm font-bold text-[#277fbf]">BABI 피드백</h3>
-          <span className="rounded-full bg-white px-2 py-1 text-[10px] whitespace-nowrap text-[#657f8e]">하루 기록 요약</span>
           <img src="/ai-report-mascot.svg" alt="" width="32" height="38" className="ml-auto h-[38px] w-8 shrink-0 object-contain" />
         </div>
         <p className="mt-2 text-sm leading-[23px] whitespace-pre-line wrap-anywhere text-[#334e60]">{report.feedback}</p>
