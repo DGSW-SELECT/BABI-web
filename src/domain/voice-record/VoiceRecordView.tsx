@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router";
 import useRecorder from "../../shared/utils/useRecorder";
 import { parseVoiceRecord, saveVoiceRecord } from "./api";
 import type { ParsedVoiceRecord } from "./types";
+import Header from "../../global/navigation/header/Header";
+import { demoBaby } from "../care-record/care-record-data";
 
 type Step = "idle" | "recording" | "analyzing" | "confirm" | "done";
 
@@ -52,6 +54,7 @@ export default function VoiceRecordView({ onGoRecords }: Props) {
 
   return (
     <main className="babi-voice-shell flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-[#101010]">
+      <Header baby={demoBaby} />
       <section className={`babi-screen babi-screen--voice ${step === "idle" ? "babi-screen--voice-idle" : ""} ${step === "recording" ? "babi-screen--recording" : ""} ${step === "confirm" ? "babi-screen--voice-confirm" : ""}`}>
 
       {(step === "idle" || step === "done" || step === "analyzing") && (
