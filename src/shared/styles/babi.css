@@ -84,21 +84,24 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 /* 실제 앱은 .babi-phone/.babi-main 대신 AppLayout의 고정 프레임을 사용함 */
 #root>div:has(.babi-screen--recording){background:#626262!important;color:#111}
 #root>div:has(.babi-screen--recording)>div:first-child{background:#626262}
+#root>div:has(.babi-screen--recording)>div:first-child header{opacity:.38;transform:none;position:relative;inset:auto}
 #root>div:has(.babi-screen--recording)>div:last-child footer{background:#626262;border-color:transparent;box-shadow:none}
 #root>div:has(.babi-screen--recording)>div:last-child footer nav{opacity:.48}
 #root>div:has(.babi-screen--recording)>div:last-child footer button{background:transparent}
 .babi-screen--recording{padding-top:0}
 .babi-voice-shell:has(.babi-screen--recording){background:#626262;color:#111}
-.babi-voice-shell:has(.babi-screen--recording)>header{opacity:.38}
-.babi-recording-mascot{position:relative;display:block;width:170px;flex:none;margin:34px 0 12px;line-height:0}
-.babi-recording-mascot .babi-mascot{display:block;width:100%!important;height:auto;margin:0;opacity:.65;filter:grayscale(.2) brightness(.9);image-rendering:auto}
+.babi-voice-shell:has(.babi-screen--recording)>header{opacity:.38;transform:none;position:relative;inset:auto}
+.babi-recording-mascot{position:relative;display:block;width:170px;flex:none;margin:42px 0 12px;line-height:0}
+.babi-recording-mascot .babi-mascot{display:block;width:100%!important;height:auto;margin:0;opacity:1;filter:none;image-rendering:auto}
 .babi-live-caption{margin:12px 0 0;color:#fff;font-size:17px;font-weight:600;line-height:1.5}
 .babi-screen--recording .babi-spacer{flex:1}
-.babi-screen--recording .babi-mic{margin-top:18px}
-.babi-screen--recording .babi-hint{color:rgba(255,255,255,.58)}
+.babi-screen--recording .babi-mic{margin-top:18px;transform:translateY(10px)}
+.babi-screen--recording .babi-mic.is-rec{transform:translateY(10px)}
+.babi-screen--recording .babi-hint{color:rgba(255,255,255,.58);transform:translateY(10px)}
 .babi-screen--voice-idle .babi-spacer{flex:0 0 clamp(40px,9vh,76px)}
+.babi-screen--voice-idle>.babi-mascot{margin-top:22px}
 .babi-screen--cry .babi-spacer{flex:0 0 clamp(40px,9vh,76px)}
-.babi-screen--voice-idle h2{font-size:30px;line-height:1.28}
+.babi-screen--voice-idle h2{font-size:34px;line-height:1.2;-webkit-text-stroke:5px #fff;paint-order:stroke fill}
 .babi-screen--voice-confirm .babi-note{width:100%;max-width:286px;min-height:286px;margin:18px 0 30px;padding:48px 20px 68px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#D7F1FA;border-radius:2px}
 .babi-screen--voice-confirm .babi-note::before{top:-16px;left:34px;width:22px;height:64px;border-width:4px}
 .babi-screen--voice-confirm .babi-note b{font-size:17px;line-height:1.5;margin:0 0 10px}
@@ -199,3 +202,22 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 .babi-nav a.is-disabled{opacity:.55;cursor:default}
 .babi-nav a:focus-visible{outline:3px solid var(--blue2);outline-offset:2px}
 @media (max-width:480px){.babi-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}}
+
+.babi-screen--recording .babi-recording-mascot{
+  filter:brightness(.6)!important;
+}
+
+.babi-screen--voice-idle h2,
+.babi-screen--voice-confirm h2,
+.babi-screen--voice:has(.babi-feature-links) h2{
+  -webkit-text-stroke:9px #fff;
+  stroke-linejoin:round;
+  paint-order:stroke fill;
+  text-shadow:none;
+}
+
+.babi-screen--activity .babi-act__go,
+.babi-act__go{display:none!important}
+
+/* 울음 분석 결과 화면 스크롤 */
+.babi-screen--cry{flex:1 1 auto;min-height:0;max-height:100%;overflow-y:auto;padding-bottom:32px}
