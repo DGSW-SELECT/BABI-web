@@ -1,3 +1,5 @@
+import FamilyAccountApiPage from "./domain/family/FamilyAccountApiPage";
+import FamilyAccountManagement from "./domain/family/FamilyAccountManagement";
 import { useRef, useState } from "react";
 import {
   HashRouter,
@@ -54,7 +56,7 @@ function AppLayout() {
   const [showHandoff, setShowHandoff] = useState(false);
   const [handoffMemo, setHandoffMemo] = useState("");
   const showHeader = pathname === "/voice-record" || pathname === "/ai-report";
-  const { height, offsetTop, isEditing, finishEditing } =
+  const { height, offsetTop, hideFooter, finishEditing } =
     useInputViewport(containerRef);
 
   function closeGrowthForm() {
@@ -150,6 +152,8 @@ function AppLayout() {
           <Route path="/activity-recommend" element={<ActivityRecommendView />} />
           <Route path="/cry-analysis" element={<CryAnalysisView />} />
           <Route path="/ai-report" element={<AiReportPage />} />
+          <Route path="/family" element={<FamilyAccountManagement />} />
+          <Route path="/family/integration" element={<FamilyAccountApiPage />} />
           <Route
             path="/care-record"
             element={<CareRecordPage onFinishEditing={finishEditing} />}
@@ -242,7 +246,7 @@ function AppLayout() {
           />
         </Routes>
       </div>
-      {!isEditing && (
+      {!hideFooter && (
         <div className="relative h-[87px] shrink-0">
           <Footer />
         </div>
