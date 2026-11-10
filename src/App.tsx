@@ -11,7 +11,7 @@ import AiReportPage from "./domain/ai-report/AiReportPage";
 import GrowthPage from "./domain/growth/GrowthPage";
 import CareRecordPage from "./domain/care-record/CareRecordPage";
 import VoiceRecordView from "./domain/voice-record/VoiceRecordView";
-import ActivityRecommendView from "./domain/activity-recommend/ActivityRecommendView";
+//import ActivityRecommendView from "./domain/activity-recommend/ActivityRecommendView";
 import CryAnalysisView from "./domain/cry-analysis/CryAnalysisView";
 import GrowthForm from "./domain/growth/GrowthForm";
 import { growthRecords } from "./domain/growth/growthData";
@@ -56,7 +56,7 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<Navigate to="/voice-record" replace />} />
           <Route path="/voice-record" element={<VoiceRecordView />} />
-          <Route path="/activity-recommend" element={<ActivityRecommendView />} />
+          {/* <Route path="/activity-recommend" element={<ActivityRecommendView />} /> */}
           <Route path="/cry-analysis" element={<CryAnalysisView />} />
           <Route path="/ai-report" element={<AiReportPage />} />
           <Route

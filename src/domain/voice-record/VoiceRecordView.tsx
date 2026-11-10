@@ -1,4 +1,3 @@
-import Mascot from "../../shared/components/Mascot";
 import MicIcon from "../../shared/components/MicIcon";
 import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router";
@@ -55,11 +54,13 @@ export default function VoiceRecordView({ onGoRecords }: Props) {
       <section className={`babi-screen babi-screen--voice ${step === "idle" ? "babi-screen--voice-idle" : ""} ${step === "recording" ? "babi-screen--recording" : ""} ${step === "confirm" ? "babi-screen--voice-confirm" : ""}`}>
 
       {(step === "idle" || step === "done" || step === "analyzing") && (
-        <Mascot />
+        <img src="/ai-report-mascot.svg" alt="마스코트" className="w-44 h-auto mx-auto" />
       )}
 
       {step === "recording" && (
-        <div className="babi-recording-mascot"><Mascot /></div>
+        <div className="babi-recording-mascot">
+          <img src="/ai-report-mascot.svg" alt="마스코트" className="w-44 h-auto mx-auto" />
+          </div>
       )}
 
       {step === "idle" && <h2>반가워요!<br />어떤 일이 있나요?</h2>}
@@ -74,7 +75,7 @@ export default function VoiceRecordView({ onGoRecords }: Props) {
         <>
           <div className="babi-note">
             <b>“{parsed.transcript}”</b>
-            <Mascot size={48} className="babi-note__mascot" />
+            <img src="/ai-report-mascot.svg" alt="마스코트" className="w-12 h-12 babi-note__mascot" />
           </div>
           <h2>이 내용이 맞나요?</h2>
           {apiError && <p className="babi-error" role="alert">{apiError}</p>}
