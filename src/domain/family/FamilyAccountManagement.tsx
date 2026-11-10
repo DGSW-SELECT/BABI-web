@@ -1,14 +1,11 @@
+import { Link } from "react-router";
 import Header from "../../global/navigation/header/Header";
-import { useState } from "react";
-import FamilyAccountCreate, { type FamilyMember } from "./FamilyAccountCreate";
-import FamilyMemberModal from "./FamilyMemberModal";
+import { useEffect, useState, type FormEvent } from "react";
+import FamilyJoinForm from "./FamilyJoinForm";
+import FamilyInviteModal from "./FamilyInviteModal";
+import { createBaby, inviteMember, listBabies, listMembers, type Baby, type Member } from "./family-api";
 import "./FamilyAccount.css";
 
-const initialMembers: FamilyMember[] = [
-  { id: 1, name: "엄마", start: "18:00", end: "21:00" },
-  { id: 2, name: "아빠", start: "13:00", end: "18:00" },
-  { id: 3, name: "할머니", start: "9:00", end: "13:00" },
-];
 const colors = [
   { borderColor: "#5fa8e8", backgroundColor: "#5fa8e81a" },
   { borderColor: "#a88be8", backgroundColor: "#a88be81a" },
@@ -25,45 +22,197 @@ function ChatIcon({ first = false }: { first?: boolean }) {
   );
 }
 
-export default function FamilyAccountManagement({ onConnect }: { onConnect?: () => void } = {}) {
-  const [creating, setCreating] = useState(false);
-  const [members, setMembers] = useState(initialMembers);
-  const [addingMember, setAddingMember] = useState(false);
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "다시 시도해주세요.";
+}
+
+const formLabel = "flex flex-col gap-[10px] text-[13px] leading-4";
+const formInput = "h-[54px] w-full min-w-0 rounded-[10px] border border-[#bbbaba] bg-white px-5 text-[15px] outline-none placeholder:text-[#868282] focus:border-[#7895bb] focus:ring-1 focus:ring-[#7895bb]";
+const formButton = "mt-5 h-14 w-full rounded-[10px] bg-[#111] text-[18px] text-white transition-colors hover:bg-[#292929] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] disabled:opacity-60";
+
+function FamilyFormHeading({ title, description }: { title: string; description: string }) {
+  return (
+    <header className="text-center">
+      <div className="relative h-[60px]">
+        <span className="auth-wordmark text-[50.4px] leading-[60px]">babi</span>
+        <img src="/auth/mascot.png" width="79" height="87" alt="" className="absolute top-[-23px] left-[65.42%] h-[87px] w-[79px] object-cover" />
+      </div>
+      <h1 className="mt-4 text-[clamp(24px,7.46vw,30px)] leading-9 tracking-[-1.2px]">{title}</h1>
+      <p className="mt-[11px] text-[15px] leading-[18px] text-[#706d6d]">{description}</p>
+    </header>
+  );
+}
+
+const roleLabels: Record<string, string> = {
+  OWNER: "소유자", GUARDIAN: "보호자", PARENT: "부모", CAREGIVER: "돌봄 보호자", VIEWER: "조회 전용",
+};
+
+export default function FamilyAccountManagement({ token }: { token: string }) {
+  return token ? (
+    <ConnectedFamily token={token} />
+  ) : (
+    <main className="family-view h-full overflow-y-auto bg-[#f8f9fa] pt-[42px] pb-6" data-input-scroll-container>
+      <BabyMembers babies={[]} token="" />
+    </main>
+  );
+}
+
+function ConnectedFamily({ token }: { token: string }) {
+  const [babies, setBabies] = useState<Baby[] | null>(null);
+  const [preferredBabyId, setBabyId] = useState<number | null>(null);
+  const selectedBaby = babies?.find((baby) => baby.babyId === preferredBabyId) ?? babies?.[0];
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    listBabies(token, controller.signal).then((items) => {
+      if (controller.signal.aborted) return;
+      setBabies(items);
+      setBabyId(items[0]?.babyId ?? null);
+    }).catch((error: unknown) => {
+      if (!controller.signal.aborted) setError(errorMessage(error));
+    });
+    return () => controller.abort();
+  }, [token, attempt]);
+
+  function selectJoinedBaby(baby: Baby) {
+    setBabies((items) => [...(items ?? []).filter((item) => item.babyId !== baby.babyId), baby]);
+    setBabyId(baby.babyId);
+  }
+
+  if (babies?.length === 0 && !error) {
+    return (
+      <main className="relative h-full overflow-y-auto bg-[#f8f9fa] pt-[clamp(64px,11dvh,100px)] pb-8 text-black" data-input-scroll-container>
+        <FamilyFormHeading title="우리아이와 함께 시작해요" description="아기 정보를 입력하고 가족 계정을 시작해보세요" />
+        <BabyRegistration token={token} onRegistered={selectJoinedBaby} />
+        <div className="mx-auto w-[81.1%]">
+          <FamilyJoinForm token={token} onJoined={selectJoinedBaby} />
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div data-input-scroll-container className="family-view relative h-full w-full overflow-y-auto bg-[#f8f9fa] pb-6">
-      {creating ? (
-        <FamilyAccountCreate
-          onBack={() => setCreating(false)}
-          onCreate={(member) => {
-            setMembers((current) => [...current, member]);
-            setCreating(false);
-          }}
-        />
+    <main className="family-view h-full overflow-y-auto bg-[#f8f9fa] pb-6" data-input-scroll-container>
+      {error || !selectedBaby ? (
+        <div className="px-[30px] pt-8">
+          <h1 className="text-center text-[24px] font-medium">가족계정관리</h1>
+          {error ? (
+            <p role="alert" className="mt-5">{error} <button className="underline" onClick={() => { setError(""); setAttempt((value) => value + 1); }}>다시 시도</button></p>
+          ) : <p role="status" className="mt-5">아기 목록을 불러오는 중이에요.</p>}
+        </div>
       ) : (
-        <main>
-          <Header baby={{ babyId: 1, name: "지민이" }} />
-          <div className="px-[30px]">
-          <h1 className="mt-[37px] text-center text-[24px] font-medium leading-[30px] text-black">
-            가족계정관리
-          </h1>
+        <BabyMembers
+          key={selectedBaby.babyId}
+          baby={selectedBaby}
+          babies={babies ?? []}
+          token={token}
+          onBabyChange={setBabyId}
+        />
+      )}
+    </main>
+  );
+}
+
+function BabyRegistration({ token, onRegistered }: { token: string; onRegistered: (baby: Baby) => void }) {
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (pending) return;
+    const data = new FormData(event.currentTarget);
+    const name = String(data.get("name") ?? "").trim();
+    const birthDate = String(data.get("birthDate") ?? "");
+    if (!name || !birthDate) {
+      setError("아기 이름과 생년월일을 입력해주세요.");
+      return;
+    }
+    setError("");
+    setPending(true);
+    try {
+      onRegistered(await createBaby(token, name, birthDate));
+    } catch (error) {
+      setError(errorMessage(error));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <form className="mx-auto mt-[39px] flex w-[81.1%] flex-col gap-[10px]" onSubmit={submit}>
+      <label className={formLabel}>아기 이름
+        <input className={formInput} name="name" placeholder="아기 이름을 입력해주세요" required maxLength={50} />
+      </label>
+      <label className={formLabel}>생년월일
+        <input className={formInput} name="birthDate" type="date" required />
+      </label>
+      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      <button className={formButton} disabled={pending} type="submit">
+        {pending ? "등록 중…" : "아기 등록"}
+      </button>
+    </form>
+  );
+}
+
+function BabyMembers({ baby, babies, token, onBabyChange }: {
+  baby?: Baby;
+  babies: Baby[];
+  onBabyChange?: (babyId: number) => void;
+  token: string;
+}) {
+  const babyId = baby?.babyId;
+  const [members, setMembers] = useState<Member[] | null>(null);
+  const [addingMember, setAddingMember] = useState(false);
+  const [invited, setInvited] = useState(false);
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    if (!token || babyId === undefined) return;
+    listMembers(token, babyId, controller.signal).then((items) => {
+      if (!controller.signal.aborted) setMembers(items);
+    }).catch((error: unknown) => {
+      if (!controller.signal.aborted) setError(errorMessage(error));
+    });
+    return () => controller.abort();
+  }, [token, babyId, attempt]);
+
+  return (
+    <>
+      {baby && <Header
+        baby={baby}
+        babies={babies}
+        onBabyChange={onBabyChange}
+      />}
+      <div className="px-[30px]">
+        <h1 className="mt-[37px] text-center text-[24px] font-medium leading-[30px] text-black">가족계정관리</h1>
+          {token ? (
           <button
             type="button"
-            onClick={onConnect ?? (() => setAddingMember(true))}
+            onClick={() => setAddingMember(true)}
             className="family-primary mt-[39px] flex h-[49px] w-full items-center justify-center gap-[9px] rounded-[13.4px] border border-[#d7d7d7] bg-black text-[13.5px] text-white hover:bg-[#303030]"
           >
             <img src="/family/add.svg" alt="" />
             육아 멤버 추가하기
           </button>
-          {onConnect && (
-            <p className="mt-3 text-sm text-[#706d6d]">
-              예시 화면이에요. <button type="button" className="underline underline-offset-2" onClick={onConnect}>로그인</button>하면 실제 보호자 목록을 볼 수 있어요.
-            </p>
+          ) : (
+            <Link to="/login" state={{ fromFamily: true }} className="mt-[39px] flex h-[49px] items-center justify-center gap-[9px] rounded-[13.4px] border border-[#d7d7d7] bg-black text-[13.5px] text-white">
+              <img src="/family/add.svg" alt="" />
+              로그인하고 육아 멤버 추가하기
+            </Link>
           )}
-          <ul className="mt-5 space-y-[15px]" aria-label="가족 돌봄 일정">
-            {members.map((member, index) => (
+          {invited && <p role="status" className="mt-4 text-sm">초대 이메일을 보냈어요. 상대가 수락하면 목록에 표시됩니다.</p>}
+          {!token ? <p className="mt-5 rounded-[13px] border border-[#d7d7d7] bg-white p-4 text-sm text-[#706d6d]">로그인하면 보호자 목록을 볼 수 있어요.</p>
+            : error ? <p role="alert" className="mt-5">{error} <button className="underline" onClick={() => { setError(""); setAttempt((value) => value + 1); }}>다시 시도</button></p>
+            : members === null ? <p role="status" className="mt-5">보호자 목록을 불러오는 중이에요.</p>
+            : members.length === 0 && <p className="mt-5">표시할 보호자가 없어요.</p>}
+          <ul className="mt-5 space-y-[15px]" aria-label="보호자 목록">
+            {members?.map((member, index) => (
               <li
-                key={member.id}
+                key={member.userId}
                 style={colors[index % colors.length]}
                 className="flex h-[72px] items-center gap-6 rounded-[13.4px] border px-5"
               >
@@ -74,17 +223,15 @@ export default function FamilyAccountManagement({ onConnect }: { onConnect?: () 
                 />
                 <div className="min-w-0 flex-1 tracking-[-0.58px]">
                   <h2 className="truncate text-[21.6px] leading-[28.34px] text-[#4a3d3c]">
-                    {member.name}
+                    {member.nickname}
                   </h2>
                   <p className="whitespace-nowrap text-[18px] leading-[28.34px] text-[#979797] max-[360px]:text-[15px]">
-                    {member.start && member.end
-                      ? `${member.start} - ${member.end}`
-                      : member.role}
+                    {roleLabels[member.role] ?? member.role}
                   </p>
                 </div>
                 <button
                   type="button"
-                  aria-label={`${member.name}에게 메시지 보내기`}
+                  aria-label={`${member.nickname}에게 메시지 보내기`}
                   className="shrink-0 rounded"
                 >
                   <ChatIcon first={index === 0} />
@@ -94,7 +241,7 @@ export default function FamilyAccountManagement({ onConnect }: { onConnect?: () 
           </ul>
           <section className="relative mt-[50px] flex h-[145px] items-center overflow-hidden rounded-[13.4px] border border-[#d7d7d7] bg-white pl-5 pr-3">
             <div className="relative z-10 min-w-0 flex-1">
-              <h2 className="whitespace-nowrap text-[14.4px] tracking-[-0.63px] text-black max-[360px]:text-[12px]">
+              <h2 className="text-[14.4px] tracking-[-0.63px] text-black max-[360px]:text-[12px]">
                 가족들에게 격려의 메시지를 전해요!
               </h2>
               <div className="mt-[13px] flex h-[49px] items-center rounded-[9px] border border-[#a7b1b5] bg-[#f8f9fa] pl-2 pr-3">
@@ -119,18 +266,20 @@ export default function FamilyAccountManagement({ onConnect }: { onConnect?: () 
               className="ml-[10px] h-[110px] w-[100px] shrink-0 object-cover max-[360px]:ml-1 max-[360px]:w-[78px] max-[360px]:object-contain"
             />
           </section>
-          </div>
-        </main>
-      )}
-      {addingMember && (
-        <FamilyMemberModal
+
+      </div>
+      {addingMember && babyId !== undefined && (
+        <FamilyInviteModal
+          token={token}
+          babyId={babyId}
           onClose={() => setAddingMember(false)}
-          onAdd={(member) => {
-            setMembers((current) => [...current, member]);
+          onInvite={async (email) => {
+            await inviteMember(token, babyId, email);
             setAddingMember(false);
+            setInvited(true);
           }}
         />
       )}
-    </div>
+    </>
   );
 }
