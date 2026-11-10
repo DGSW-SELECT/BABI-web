@@ -1,5 +1,5 @@
+import Header from "../../global/navigation/header/Header";
 import { useState } from "react";
-import Footer from "../../global/navigation/Footer";
 import FamilyAccountCreate, { type FamilyMember } from "./FamilyAccountCreate";
 import FamilyMemberModal from "./FamilyMemberModal";
 import "./FamilyAccount.css";
@@ -15,78 +15,23 @@ const colors = [
   { borderColor: "#72c58a", backgroundColor: "#72c58a1a" },
 ];
 
-function ChatIcon({
-  header = false,
-  first = false,
-}: {
-  header?: boolean;
-  first?: boolean;
-}) {
+function ChatIcon({ first = false }: { first?: boolean }) {
   return (
-    <span
-      className={
-        header
-          ? "relative block size-[36.3px]"
-          : "relative block h-[21.78px] w-[25.2px]"
-      }
-      aria-hidden="true"
-    >
-      {header && (
-        <img
-          src="/family/chat-circle.svg"
-          alt=""
-          className="absolute left-0 top-0"
-        />
-      )}
-      <span
-        className={
-          header
-            ? "absolute left-[6.26px] top-[9.09px]"
-            : "absolute left-0 top-0"
-        }
-      >
-        <img
-          src={
-            header
-              ? "/family/header-chat.svg"
-              : first
-                ? "/family/chat.svg"
-                : "/family/member-chat.svg"
-          }
-          alt=""
-        />
-        <img
-          src={
-            header
-              ? "/family/header-chat-tail.svg"
-              : first
-                ? "/family/chat-tail.svg"
-                : "/family/member-chat-tail.svg"
-          }
-          alt=""
-          className={
-            header
-              ? "absolute left-[12.96px] top-[13.77px]"
-              : "absolute left-[13.86px] top-[15px]"
-          }
-        />
-        <span
-          className={`absolute left-[5px] top-[-5px] tracking-[1px] ${header ? "text-[15px] text-[#a6b1b5]" : "text-[17px] text-white"}`}
-        >
-          ···
-        </span>
-      </span>
+    <span className="relative block h-[21.78px] w-[25.2px]" aria-hidden="true">
+      <img src={first ? "/family/chat.svg" : "/family/member-chat.svg"} alt="" />
+      <img src={first ? "/family/chat-tail.svg" : "/family/member-chat-tail.svg"} alt="" className="absolute left-[13.86px] top-[15px]" />
+      <span className="absolute left-[5px] top-[-5px] text-[17px] tracking-[1px] text-white">···</span>
     </span>
   );
 }
 
-export default function FamilyAccountManagement() {
+export default function FamilyAccountManagement({ onConnect }: { onConnect?: () => void } = {}) {
   const [creating, setCreating] = useState(false);
   const [members, setMembers] = useState(initialMembers);
   const [addingMember, setAddingMember] = useState(false);
 
   return (
-    <div className="family-view relative mx-auto min-h-[max(874px,100svh)] w-full max-w-[402px] bg-[#f8f9fa] pb-[112px] shadow-[0_0_24px_rgba(0,0,0,0.08)]">
+    <div data-input-scroll-container className="family-view relative h-full w-full overflow-y-auto bg-[#f8f9fa] pb-6">
       {creating ? (
         <FamilyAccountCreate
           onBack={() => setCreating(false)}
@@ -96,57 +41,25 @@ export default function FamilyAccountManagement() {
           }}
         />
       ) : (
-        <main className="px-[30px] pt-[79px]">
-          <header className="flex h-12 items-center justify-between gap-2">
-            <button
-              type="button"
-              aria-label="선택된 아이: 지민이"
-              className="flex h-12 w-[150px] min-w-0 items-center gap-[7px] rounded-[14px] bg-white pl-[10px] pr-3"
-            >
-              <img
-                src="/family/avatar.png"
-                alt=""
-                className="size-[36.3px] shrink-0"
-              />
-              <span className="flex-1 text-left text-[15px] text-[#4a3d3c]">
-                지민이
-              </span>
-              <span
-                className="size-[10px] -translate-y-0.5 rotate-45 border-b-2 border-r-2 border-[#252525]"
-                aria-hidden="true"
-              />
-            </button>
-            <div className="flex items-center gap-[6px]">
-              <button type="button" aria-label="채팅" className="rounded-full">
-                <ChatIcon header />
-              </button>
-              <button type="button" aria-label="알림" className="rounded-full">
-                <img src="/family/alarm.svg" alt="" />
-              </button>
-              <button
-                type="button"
-                aria-label="프로필"
-                className="rounded-full"
-              >
-                <img
-                  src="/family/avatar.png"
-                  alt=""
-                  className="size-[36.3px]"
-                />
-              </button>
-            </div>
-          </header>
+        <main>
+          <Header baby={{ babyId: 1, name: "지민이" }} />
+          <div className="px-[30px]">
           <h1 className="mt-[37px] text-center text-[24px] font-medium leading-[30px] text-black">
             가족계정관리
           </h1>
           <button
             type="button"
-            onClick={() => setAddingMember(true)}
+            onClick={onConnect ?? (() => setAddingMember(true))}
             className="family-primary mt-[39px] flex h-[49px] w-full items-center justify-center gap-[9px] rounded-[13.4px] border border-[#d7d7d7] bg-black text-[13.5px] text-white hover:bg-[#303030]"
           >
             <img src="/family/add.svg" alt="" />
             육아 멤버 추가하기
           </button>
+          {onConnect && (
+            <p className="mt-3 text-sm text-[#706d6d]">
+              예시 화면이에요. <button type="button" className="underline underline-offset-2" onClick={onConnect}>로그인</button>하면 실제 보호자 목록을 볼 수 있어요.
+            </p>
+          )}
           <ul className="mt-5 space-y-[15px]" aria-label="가족 돌봄 일정">
             {members.map((member, index) => (
               <li
@@ -186,6 +99,7 @@ export default function FamilyAccountManagement() {
               </h2>
               <div className="mt-[13px] flex h-[49px] items-center rounded-[9px] border border-[#a7b1b5] bg-[#f8f9fa] pl-2 pr-3">
                 <input
+                  data-keep-footer-visible
                   aria-label="가족에게 전할 메시지"
                   placeholder="메시지를 입력하세요."
                   className="min-w-0 flex-1 bg-transparent text-[11px] text-[#4a3d3c] outline-none placeholder:text-[#c1c1c1]"
@@ -205,9 +119,9 @@ export default function FamilyAccountManagement() {
               className="ml-[10px] h-[110px] w-[100px] shrink-0 object-cover max-[360px]:ml-1 max-[360px]:w-[78px] max-[360px]:object-contain"
             />
           </section>
+          </div>
         </main>
       )}
-      <Footer />
       {addingMember && (
         <FamilyMemberModal
           onClose={() => setAddingMember(false)}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { RefObject } from 'react'
 
-type InputViewportState = { isEditing: boolean; height: number; offsetTop: number }
+type InputViewportState = { hideFooter: boolean; height: number; offsetTop: number }
 
 function isTypingField(tagName: string, inputType = 'text'): boolean {
   if (tagName.toLowerCase() === 'textarea') return true
@@ -22,7 +22,7 @@ function getActiveField(root: HTMLElement | null): HTMLInputElement | HTMLTextAr
 }
 
 export function useInputViewport(containerRef: RefObject<HTMLDivElement | null>) {
-  const [viewport, setViewport] = useState<InputViewportState>({ isEditing: false, height: 0, offsetTop: 0 })
+  const [viewport, setViewport] = useState<InputViewportState>({ hideFooter: false, height: 0, offsetTop: 0 })
 
   useEffect(() => {
     const root = containerRef.current
@@ -83,8 +83,9 @@ export function useInputViewport(containerRef: RefObject<HTMLDivElement | null>)
       }
 
       const isEditing = Boolean(field && editingForFocus)
-      setViewport((previous) => previous.isEditing === isEditing && previous.height === height && previous.offsetTop === offsetTop
-        ? previous : { isEditing, height, offsetTop })
+      const hideFooter = isEditing && !field?.hasAttribute('data-keep-footer-visible')
+      setViewport((previous) => previous.hideFooter === hideFooter && previous.height === height && previous.offsetTop === offsetTop
+        ? previous : { hideFooter, height, offsetTop })
       cancelAnimationFrame(scrollFrame)
       if (isEditing && field) scrollFrame = requestAnimationFrame(() => keepFieldVisible(field))
     }
@@ -137,7 +138,7 @@ export function useInputViewport(containerRef: RefObject<HTMLDivElement | null>)
 
   const finishEditing = useCallback(() => {
     getActiveField(containerRef.current)?.blur()
-    setViewport((previous) => ({ ...previous, isEditing: false }))
+    setViewport((previous) => ({ ...previous, hideFooter: false }))
   }, [containerRef])
 
   return { ...viewport, finishEditing }
