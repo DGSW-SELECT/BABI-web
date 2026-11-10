@@ -1,4 +1,5 @@
-import FamilyAccountApiPage from "./domain/family/FamilyAccountApiPage";
+import AuthView from "./domain/auth/AuthView";
+import { login } from "./global/api/auth";
 import FamilyAccountManagement from "./domain/family/FamilyAccountManagement";
 import { useRef, useState } from "react";
 import {
@@ -47,7 +48,8 @@ export default function App() {
 function AppLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  const [accessToken, setAccessToken] = useState("");
   const [records, setRecords] = useState<GrowthRecord[]>(growthRecords);
   const [vaccinations, setVaccinations] =
     useState<VaccinationSchedule[]>(createVaccinationSchedules);
@@ -152,8 +154,14 @@ function AppLayout() {
           <Route path="/activity-recommend" element={<ActivityRecommendView />} />
           <Route path="/cry-analysis" element={<CryAnalysisView />} />
           <Route path="/ai-report" element={<AiReportPage />} />
-          <Route path="/family" element={<FamilyAccountManagement />} />
-          <Route path="/family/integration" element={<FamilyAccountApiPage />} />
+          <Route path="/login" element={<AuthView onLogin={async (email, password) => {
+            const token = await login(email, password);
+            finishEditing();
+            setAccessToken(token);
+            navigate(state?.fromFamily === true ? "/family" : "/", { replace: true });
+          }} />} />
+          <Route path="/family" element={<FamilyAccountManagement token={accessToken} />} />
+          <Route path="/family/integration" element={<Navigate to="/family" replace />} />
           <Route
             path="/care-record"
             element={<CareRecordPage onFinishEditing={finishEditing} />}
@@ -246,7 +254,7 @@ function AppLayout() {
           />
         </Routes>
       </div>
-      {!hideFooter && (
+      {!hideFooter && pathname !== "/login" && (
         <div className="relative h-[87px] shrink-0">
           <Footer />
         </div>

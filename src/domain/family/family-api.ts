@@ -1,33 +1,10 @@
-const base = (import.meta.env.VITE_FAMILY_API_URL || "/family-api").replace(/\/$/, "");
+import { request } from "../../global/api/babi-request";
 
 export type Baby = { babyId: number; name: string; birthDate?: string };
 export type Member = { userId: number; nickname: string; role: string };
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(base + path, init);
-  const body = await response.json().catch(() => null) as {
-    success: boolean;
-    message?: string;
-    data: T;
-  } | null;
-  if (!response.ok || !body?.success) {
-    throw new Error(body?.message || "요청에 실패했어요. (" + response.status + ")");
-  }
-  return body.data;
-}
-
 function auth(token: string) {
   return { Authorization: "Bearer " + token };
-}
-
-export async function login(email: string, password: string) {
-  const data = await request<{ accessToken: string }>("/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!data?.accessToken) throw new Error("로그인 토큰을 받지 못했어요.");
-  return data.accessToken;
 }
 
 export function listBabies(token: string, signal: AbortSignal) {

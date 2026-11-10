@@ -44,10 +44,12 @@ function Field({
   label,
   password = false,
   small = false,
+  name,
 }: {
   label: string;
   password?: boolean;
   small?: boolean;
+  name: string;
 }) {
   const [visible, setVisible] = useState(false);
   const placeholder = password
@@ -58,6 +60,8 @@ function Field({
       {label}
       <span className="relative block">
         <input
+          name={name}
+          required
           type={
             password && !visible
               ? "password"
@@ -66,7 +70,7 @@ function Field({
                 : "text"
           }
           autoComplete={
-            password ? "new-password" : label === "이메일" ? "email" : "name"
+            password ? (name === "password" && !small ? "current-password" : "new-password") : label === "이메일" ? "email" : "name"
           }
           placeholder={placeholder}
           className={`h-[54px] w-full rounded-[10px] border border-[#bbbaba] bg-white px-5 pr-12 outline-none placeholder:text-[#868282] focus:border-[#7895bb] focus:ring-1 focus:ring-[#7895bb] ${small ? "text-[13px]" : "text-[15px]"}`}
@@ -212,15 +216,16 @@ export function Verification({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default function AuthView() {
-  const [signup, setSignup] = useState(window.location.hash === "#signup");
-  const [verification, setVerification] = useState(false);
+export default function AuthView({ onLogin }: { onLogin: (email: string, password: string) => Promise<void> }) {
+  const [signup, setSignup] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
   function changeScreen(value: boolean) {
     setSignup(value);
-    window.history.replaceState(null, "", value ? "#signup" : "#login");
+    setError("");
   }
   return (
-    <main className="relative mx-auto min-h-[max(874px,100svh)] w-full max-w-[402px] overflow-hidden bg-[#f8f9fa] pb-[62px] text-black shadow-[0_0_24px_rgba(0,0,0,0.08)]">
+    <main className="relative mx-auto h-full w-full max-w-[402px] overflow-y-auto bg-[#f8f9fa] pb-[62px] text-black shadow-[0_0_24px_rgba(0,0,0,0.08)]">
       <header className="relative pt-[100px] text-center">
         <div className="relative h-[60px]">
           <span className="auth-wordmark text-[50.4px] leading-[60px]">
@@ -244,24 +249,39 @@ export default function AuthView() {
         </p>
       </header>
       <form
-        noValidate
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
-          if (!signup) setVerification(true);
+          if (pending) return;
+          if (signup) {
+            setError("회원가입은 아직 연결되지 않았어요.");
+            return;
+          }
+          const values = new FormData(event.currentTarget);
+          setPending(true);
+          setError("");
+          try {
+            await onLogin(String(values.get("email") ?? "").trim(), String(values.get("password") ?? ""));
+          } catch (error) {
+            setError(error instanceof Error ? error.message : "로그인하지 못했어요.");
+          } finally {
+            setPending(false);
+          }
         }}
         className={`mx-auto w-[81.1%] ${signup ? "mt-[39px]" : "mt-[43px]"}`}
       >
         <div className="flex flex-col gap-[10px]">
-          {signup && <Field label="이름" small />}
-          <Field label="이메일" small={signup} />
-          <Field label="비밀번호" password />
-          {signup && <Field label="비밀번호 확인" password />}
+          {signup && <Field name="nickname" label="이름" small />}
+          <Field name="email" label="이메일" small={signup} />
+          <Field name="password" label="비밀번호" password small={signup} />
+          {signup && <Field name="passwordConfirm" label="비밀번호 확인" password />}
         </div>
+        {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
         <button
+          disabled={pending}
           type="submit"
           className={`h-14 w-full rounded-[10px] bg-[#111] text-[18px] text-white transition-colors hover:bg-[#292929] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${signup ? "mt-[54px]" : "mt-8"}`}
         >
-          {signup ? "회원가입" : "로그인"}
+          {pending ? "로그인 중…" : signup ? "회원가입" : "로그인"}
         </button>
         {signup ? (
           <p className="mt-[15px] text-center text-[13px] leading-[18px] text-[#868282]">
@@ -314,7 +334,6 @@ export default function AuthView() {
           </div>
         </div>
       )}
-      {verification && <Verification onClose={() => setVerification(false)} />}
     </main>
   );
 }
