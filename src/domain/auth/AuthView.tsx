@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 function GoogleLogo() {
   const parts = [
@@ -42,12 +44,16 @@ function GoogleLogo() {
 
 function Field({
   label,
+  name,
   password = false,
   small = false,
+  register = false,
 }: {
   label: string;
+  name: string;
   password?: boolean;
   small?: boolean;
+  register?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
   const placeholder = password
@@ -58,6 +64,12 @@ function Field({
       {label}
       <span className="relative block">
         <input
+          name={name}
+          required
+          minLength={password && register ? 8 : undefined}
+          maxLength={password && register ? 20 : name === "nickname" ? 50 : name === "email" ? 320 : undefined}
+          pattern={password && register ? "[!-~]+" : undefined}
+          title={password && register ? "비밀번호는 영문·숫자·기호로 8~20자 입력해주세요." : undefined}
           type={
             password && !visible
               ? "password"
@@ -66,7 +78,7 @@ function Field({
                 : "text"
           }
           autoComplete={
-            password ? "new-password" : label === "이메일" ? "email" : "name"
+            password ? (register ? "new-password" : "current-password") : name === "email" ? "email" : "nickname"
           }
           placeholder={placeholder}
           className={`h-[54px] w-full rounded-[10px] border border-[#bbbaba] bg-white px-5 pr-12 outline-none placeholder:text-[#868282] focus:border-[#7895bb] focus:ring-1 focus:ring-[#7895bb] ${small ? "text-[13px]" : "text-[15px]"}`}
@@ -110,7 +122,7 @@ export function Verification({ onClose }: { onClose: () => void }) {
   const remainingTime = `${String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:${String(remainingSeconds % 60).padStart(2, "0")}`;
   return (
     <div
-      className="absolute inset-0 z-50 bg-black/60"
+      className="fixed inset-0 z-50 mx-auto max-w-[402px] bg-black/60"
       onKeyDown={(event) => {
         if (event.key === "Escape") onClose();
       }}
@@ -125,7 +137,7 @@ export function Verification({ onClose }: { onClose: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="verification-title"
-        className="absolute inset-x-0 bottom-0 h-[487px] rounded-t-[50px] bg-white text-center text-black"
+        className="absolute inset-x-0 bottom-0 max-h-[90svh] min-h-[487px] overflow-y-auto rounded-t-[50px] bg-white text-center text-black"
       >
         <button
           type="button"
@@ -212,15 +224,53 @@ export function Verification({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default function AuthView() {
-  const [signup, setSignup] = useState(window.location.hash === "#signup");
-  const [verification, setVerification] = useState(false);
+export default function AuthView({ onLogin }: { onLogin: (email: string, password: string) => Promise<void> }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const signup = location.pathname === "/signup";
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const busy = useRef(false);
+  const notice = typeof location.state?.notice === "string" ? location.state.notice : "";
+
   function changeScreen(value: boolean) {
-    setSignup(value);
-    window.history.replaceState(null, "", value ? "#signup" : "#login");
+    navigate((value ? "/signup" : "/login") + location.search, { state: location.state });
   }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy.current) return;
+    const values = new FormData(event.currentTarget);
+    const email = String(values.get("email") ?? "").trim();
+    const password = String(values.get("password") ?? "");
+    const input = {
+      email, password,
+      passwordConfirm: String(values.get("passwordConfirm") ?? ""),
+      nickname: String(values.get("nickname") ?? "").trim(),
+    };
+    if (signup && (!input.nickname || input.password !== input.passwordConfirm)) {
+      setError(!input.nickname ? "이름을 입력해주세요." : "비밀번호가 일치하지 않아요.");
+      return;
+    }
+    busy.current = true;
+    setPending(true);
+    setError("");
+    try {
+      if (signup) {
+        setError("회원가입은 아직 연결되지 않았어요.");
+      } else {
+        await onLogin(email, password);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "요청을 처리하지 못했어요.");
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
+  }
+
   return (
-    <main className="relative mx-auto min-h-[max(874px,100svh)] w-full max-w-[402px] overflow-hidden bg-[#f8f9fa] pb-[62px] text-black shadow-[0_0_24px_rgba(0,0,0,0.08)]">
+    <main className="relative mx-auto h-dvh w-full max-w-[402px] overflow-y-auto bg-[#f8f9fa] pb-[62px] text-black shadow-[0_0_24px_rgba(0,0,0,0.08)]">
       <header className="relative pt-[100px] text-center">
         <div className="relative h-[60px]">
           <span className="auth-wordmark text-[50.4px] leading-[60px]">
@@ -244,30 +294,31 @@ export default function AuthView() {
         </p>
       </header>
       <form
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!signup) setVerification(true);
-        }}
+        onSubmit={submit}
+        aria-label={signup ? "회원가입" : "로그인"}
         className={`mx-auto w-[81.1%] ${signup ? "mt-[39px]" : "mt-[43px]"}`}
       >
-        <div className="flex flex-col gap-[10px]">
-          {signup && <Field label="이름" small />}
-          <Field label="이메일" small={signup} />
-          <Field label="비밀번호" password />
-          {signup && <Field label="비밀번호 확인" password />}
-        </div>
+        {notice && <p role="status" className="mb-4 text-sm leading-6 text-[#587797]">{notice}</p>}
+        {error && <p role="alert" className="mb-4 text-sm leading-6 text-red-700">{error}</p>}
+        <fieldset disabled={pending} className="flex flex-col gap-[10px]">
+          {signup && <Field label="이름" name="nickname" small />}
+          <Field label="이메일" name="email" small={signup} />
+          <Field label="비밀번호" name="password" password register={signup} />
+          {signup && <Field label="비밀번호 확인" name="passwordConfirm" password register />}
+        </fieldset>
         <button
           type="submit"
-          className={`h-14 w-full rounded-[10px] bg-[#111] text-[18px] text-white transition-colors hover:bg-[#292929] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${signup ? "mt-[54px]" : "mt-8"}`}
+          disabled={pending}
+          className={`disabled:opacity-50 h-14 w-full rounded-[10px] bg-[#111] text-[18px] text-white transition-colors hover:bg-[#292929] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${signup ? "mt-[54px]" : "mt-8"}`}
         >
-          {signup ? "회원가입" : "로그인"}
+          {pending ? "처리 중…" : signup ? "회원가입" : "로그인"}
         </button>
         {signup ? (
           <p className="mt-[15px] text-center text-[13px] leading-[18px] text-[#868282]">
             이미 계정이 있으신가요?{" "}
             <button
               type="button"
+              disabled={pending}
               onClick={() => changeScreen(false)}
               className="ml-[9px] text-[14px] text-[#393838] underline underline-offset-4"
             >
@@ -276,11 +327,12 @@ export default function AuthView() {
           </p>
         ) : (
           <div className="mt-[15px] flex justify-between text-[13px] leading-[18px] text-[#868282]">
-            <button type="button" className="underline underline-offset-4">
+            <button type="button" disabled className="underline underline-offset-4">
               비밀번호를 잊으셨나요?
             </button>
             <button
               type="button"
+              disabled={pending}
               onClick={() => changeScreen(true)}
               className="underline underline-offset-4"
             >
@@ -299,6 +351,7 @@ export default function AuthView() {
           <div className="mx-auto mt-8 flex w-[81.1%] flex-col gap-[15px]">
             <button
               type="button"
+              disabled
               className="flex h-[54px] items-center justify-center gap-[15px] rounded bg-[#03c75a] text-[18px] text-white hover:brightness-95"
             >
               <img src="/auth/naver.svg" width="16" height="16" alt="" />
@@ -306,6 +359,7 @@ export default function AuthView() {
             </button>
             <button
               type="button"
+              disabled
               className="flex h-[54px] items-center justify-center gap-2 rounded border border-[#999] bg-white text-[18px] font-medium hover:bg-slate-50"
             >
               <GoogleLogo />
@@ -314,7 +368,6 @@ export default function AuthView() {
           </div>
         </div>
       )}
-      {verification && <Verification onClose={() => setVerification(false)} />}
     </main>
   );
 }

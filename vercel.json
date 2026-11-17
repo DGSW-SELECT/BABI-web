@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/family-api/:path*",
+      "destination": "https://api.babi.prot.kr/:path*"
+    },
+    {
+      "source": "/backend/:path*",
+      "destination": "https://api.babi.prot.kr/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
