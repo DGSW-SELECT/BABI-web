@@ -155,7 +155,7 @@ export default function Footer() {
   if (pathname === "/voice-record") activeTab = "홈";
   if (pathname === "/care-record") activeTab = "기록";
   if (pathname === "/family") activeTab = "마이페이지";
-  if (pathname === "/ai-report") activeTab = "AI";
+  if (pathname === "/ai-report" || pathname.startsWith("/ai-report/")) activeTab = "AI";
   if (
     pathname === "/schedule" || pathname.startsWith("/schedule/") ||
     pathname === "/growth" || pathname.startsWith("/growth/") ||
