@@ -19,18 +19,9 @@ export default function GrowthForm({ record, onSave, onClose }: GrowthFormProps)
   const [selectedType, setSelectedType] = useState<GrowthType>(record?.height === undefined && record?.weight !== undefined ? 'weight' : 'height')
   const [memo, setMemo] = useState(record?.memo ?? '')
   const [errors, setErrors] = useState<GrowthErrors>({})
-  const [showConfirm, setShowConfirm] = useState(false)
   const { name, unit } = growthLabels[selectedType]
-  const warnings = getGrowthWarnings(input)
 
   useEffect(() => { titleRef.current?.focus() }, [])
-
-  function saveRecord() {
-    const savedRecord: GrowthRecord = { id: record?.id ?? Date.now(), date: input.date, memo: memo.trim() }
-    if (input.height.trim()) savedRecord.height = Number(input.height)
-    if (input.weight.trim()) savedRecord.weight = Number(input.weight)
-    onSave(savedRecord)
-  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -41,13 +32,20 @@ export default function GrowthForm({ record, onSave, onClose }: GrowthFormProps)
       else if (newErrors.weight) setSelectedType('weight')
       return
     }
-    if (warnings.length > 0) setShowConfirm(true)
-    else saveRecord()
+    const savedRecord: GrowthRecord = { id: record?.id ?? Date.now(), date: input.date, memo: memo.trim() }
+    if (input.height.trim()) savedRecord.height = Number(input.height)
+    if (input.weight.trim()) savedRecord.weight = Number(input.weight)
+    onSave(savedRecord)
+  }
+
+  function updateValue(value: string) {
+    const newInput = { ...input, [selectedType]: value }
+    setInput(newInput)
+    setErrors({ ...errors, [selectedType]: value.trim() ? checkGrowthInput(newInput)[selectedType] : undefined })
   }
 
   function changeValue(change: number) {
-    setInput({ ...input, [selectedType]: changeGrowthValue(input[selectedType], change) })
-    setErrors({ ...errors, [selectedType]: undefined })
+    updateValue(changeGrowthValue(input[selectedType], change))
   }
 
   function openDatePicker() {
@@ -89,8 +87,8 @@ export default function GrowthForm({ record, onSave, onClose }: GrowthFormProps)
           </fieldset>
           <label htmlFor={`${formId}-value`} className="mt-4.5 mb-1.5 block text-sm font-bold">측정 값<span className="sr-only"> ({name})</span></label>
           <div className="flex min-h-11 items-center gap-2 rounded-2xl border border-[#d6d6d6] pr-1.5 pl-3 focus-within:outline-2 focus-within:outline-[#63c980]">
-            <input id={`${formId}-value`} type="number" inputMode="decimal" enterKeyHint="done" step="any" value={input[selectedType]}
-              placeholder={selectedType === 'height' ? '80.0' : '10.0'} onChange={(event) => setInput({ ...input, [selectedType]: event.target.value })}
+            <input id={`${formId}-value`} type="number" inputMode="decimal" enterKeyHint="done" min="0.1" step="0.1" value={input[selectedType]}
+              placeholder={selectedType === 'height' ? '80.0' : '10.0'} onChange={(event) => updateValue(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() }
                 if (event.key === 'ArrowUp' || event.key === 'ArrowDown') { event.preventDefault(); changeValue(event.key === 'ArrowUp' ? 1 : -1) }
@@ -98,10 +96,10 @@ export default function GrowthForm({ record, onSave, onClose }: GrowthFormProps)
               aria-invalid={Boolean(errors[selectedType])} aria-describedby={`${formId}-precision${errors[selectedType] ? ` ${formId}-value-error` : ''}`}
               className="min-w-0 flex-1 appearance-none bg-transparent text-base font-medium outline-none placeholder:text-[#92979d] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
             <span aria-hidden="true" className="text-sm text-[#92979d]">{unit}</span>
-            <button type="button" onClick={() => changeValue(-1)} aria-label={`${name} 1 줄이기`} className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-lg hover:bg-[#f0f8f2]">−</button>
+            <button type="button" onClick={() => changeValue(-1)} disabled={!input[selectedType].trim() || Number(input[selectedType]) <= 0.1} aria-label={`${name} 1 줄이기`} className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-lg hover:bg-[#f0f8f2] disabled:cursor-default disabled:opacity-40">−</button>
             <button type="button" onClick={() => changeValue(1)} aria-label={`${name} 1 늘리기`} className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-lg hover:bg-[#f0f8f2]">+</button>
           </div>
-          <p id={`${formId}-precision`} className="mt-1.5 text-xs text-[#92979d]">소수점 첫째 자리까지 입력해주세요.</p>
+          <p id={`${formId}-precision`} className="mt-1.5 text-xs text-[#92979d]">0보다 큰 값을 소수점 첫째 자리까지 입력해주세요.</p>
           {errors[selectedType] && <p id={`${formId}-value-error`} role="alert" className="mt-1 text-xs text-red-700">{errors[selectedType]}</p>}
           <label htmlFor={`${formId}-memo`} className="mt-4.5 mb-1.5 block text-sm font-bold">메모</label>
           <textarea id={`${formId}-memo`} value={memo} rows={2} placeholder="메모를 입력하세요" onChange={(event) => setMemo(event.target.value)}
@@ -109,32 +107,7 @@ export default function GrowthForm({ record, onSave, onClose }: GrowthFormProps)
           <button type="submit" className="mt-4 min-h-11.5 w-full cursor-pointer rounded-[17px] bg-[#121212] text-base font-medium text-white">{record ? '수정 저장' : '추가'}</button>
         </form>
       </div>
-      {showConfirm && <ConfirmDialog warnings={warnings} label={record ? '그대로 저장' : '그대로 추가'} onCancel={() => setShowConfirm(false)} onConfirm={saveRecord} />}
     </main>
-  )
-}
-
-function ConfirmDialog({ warnings, label, onCancel, onConfirm }: { warnings: string[]; label: string; onCancel: () => void; onConfirm: () => void }) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const titleId = useId()
-  useEffect(() => {
-    const opener = document.activeElement
-    const dialog = dialogRef.current
-    dialog?.showModal()
-    return () => { dialog?.close(); if (opener instanceof HTMLElement && opener.isConnected) opener.focus() }
-  }, [])
-  return (
-    <dialog ref={dialogRef} aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); onCancel() }}
-      className="fixed inset-0 m-auto w-[calc(100%-40px)] max-w-90 rounded-2xl border-0 bg-white p-5 text-[#121212] shadow-xl backdrop:bg-black/35">
-      <h2 id={titleId} className="text-lg font-bold">입력값 확인</h2>
-      <p className="mt-3 text-sm leading-relaxed">입력한 값과 단위, 소수점을 다시 확인해주세요. 확인 후 계속 진행할 수도 있어요.</p>
-      <ul className="mt-3 space-y-2 text-sm text-[#8a541d]">{warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>
-      <p className="mt-3 text-xs text-[#92979d]">이 확인은 의학적 정상 여부를 판단하는 기능이 아니에요.</p>
-      <div className="mt-5 flex gap-2">
-        <button type="button" onClick={onCancel} className="min-h-11 flex-1 cursor-pointer rounded-xl border border-[#d6d6d6] text-sm">다시 확인</button>
-        <button type="button" onClick={onConfirm} className="min-h-11 flex-1 cursor-pointer rounded-xl bg-[#121212] px-2 text-sm text-white">{label}</button>
-      </div>
-    </dialog>
   )
 }
 
@@ -157,6 +130,7 @@ function checkGrowthInput(input: GrowthInput): GrowthErrors {
     if (!input[type].trim()) continue
     const value = Number(input[type])
     if (!Number.isFinite(value)) errors[type] = `${growthLabels[type].name}를 숫자로 입력해주세요.`
+    else if (value <= 0) errors[type] = `${growthLabels[type].name}는 0보다 큰 값을 입력해주세요.`
     else if (Number(value.toFixed(1)) !== value) errors[type] = '소수점 첫째 자리까지 입력해주세요.'
   }
   if (!input.height.trim() && !input.weight.trim()) {
@@ -168,16 +142,6 @@ function checkGrowthInput(input: GrowthInput): GrowthErrors {
 
 function changeGrowthValue(value: string, change: number) {
   const number = Number(value)
-  if (!Number.isFinite(number)) return String(change)
-  return String(Number((number + change).toFixed(1)))
-}
-
-function getGrowthWarnings(input: GrowthInput) {
-  const warnings: string[] = []
-  for (const type of growthTypes) {
-    if (input[type].trim() && Number(input[type]) <= 0) {
-      warnings.push(`${growthLabels[type].name} ${input[type]}${growthLabels[type].unit} — 0 이하의 값을 입력했어요.`)
-    }
-  }
-  return warnings
+  if (!value.trim() || !Number.isFinite(number)) return change > 0 ? '1' : ''
+  return String(Math.max(0.1, Number((number + change).toFixed(1))))
 }
