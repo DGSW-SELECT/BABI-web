@@ -1,5 +1,3 @@
-import mascot from "../assets/babi-mascot.png";
-
 interface Props {
   size?: number;
   className?: string;
@@ -10,7 +8,7 @@ export default function Mascot({ size = 180, className = "" }: Props) {
   return (
     <img
       className={`babi-mascot ${className}`}
-      src={mascot}
+      src="/ai-report-mascot.svg"
       style={{ width: size }}
       alt="BABI 마스코트"
     />
