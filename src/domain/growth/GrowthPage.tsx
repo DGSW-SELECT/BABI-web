@@ -18,10 +18,11 @@ export default function GrowthPage({ records }: GrowthPageProps) {
   }
 
   return (
-    <main className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
-      <div className="page-title-header" aria-hidden="true" />
-      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pt-3 pb-6 max-[360px]:px-3">
+    <main className="page-content-start flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
+      <div className="shrink-0 px-5 max-[360px]:px-3">
         <CalendarTabs />
+      </div>
+      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pb-6 max-[360px]:px-3">
         <section className="rounded-[17px] border border-[#63c980] bg-[#ecf5ef] px-5 pt-[18px] pb-5 max-[360px]:px-3" aria-label="한눈에 보기">
           <h2 className="mb-3 pl-[9px] text-base font-bold">한눈에 보기</h2>
           <div className="grid grid-cols-2 gap-5 max-[360px]:gap-3">

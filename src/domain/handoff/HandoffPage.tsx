@@ -37,7 +37,7 @@ export default function HandoffPage({ mode, memo, onSave, onClose }: HandoffPage
       { sender: 'me', texts: [text] },
       { sender: 'babi', texts: [isChecking
         ? '추가 메모에 반영했어요. 내용을 확인한 뒤 저장해주세요.'
-        : 'AI 답변은 아직 연결 전이에요. 지금은 아래 돌봄 요약과 전달 메모를 확인할 수 있어요.'] },
+        : '돌봄 요약을 확인해보세요. 더 궁금한 내용이 있으면 알려주세요.'] },
     ])
     if (isChecking) setNote((previous) => previous ? `${previous}\n${text}` : text)
     setInput('')

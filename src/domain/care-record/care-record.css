@@ -29,9 +29,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 34px;
+  height: 31px;
 }
-.record-header h1 {
+.record-add .record-header h1 {
   margin: 0;
   font-size: 24px;
   line-height: 33.8px;
@@ -47,29 +47,6 @@
   outline: 2px solid #7895bb;
   outline-offset: 3px;
 }
-.record-filters {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 11px 8px 25px 11px;
-}
-.record-filters button {
-  border-radius: 30px;
-  width: 55px;
-  height: 30px;
-  background: #e4e4e4;
-  font-size: 15px;
-  font-weight: 500;
-  transition: background 0.15s;
-}
-.record-filters button:hover {
-  background: #d5d5d5;
-}
-.record-filters button.selected {
-  color: white;
-  background: #000;
-}
 .record-list-scroll,
 .record-form-scroll {
   flex: 1;
@@ -77,8 +54,6 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #c5ccd4 transparent;
   -webkit-overflow-scrolling: touch;
 }
 .record-list-scroll {
@@ -237,10 +212,10 @@
   height: 14px;
 }
 .record-add {
-  padding-bottom: 0;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 .record-add .record-header {
-  height: 54px;
+  height: 56px;
 }
 .record-close {
   position: absolute;
@@ -287,6 +262,20 @@
 }
 .record-category-tabs img {
   flex-shrink: 0;
+}
+.record-filters {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 11px 0 25px;
+}
+.record-category-tabs.record-filters button {
+  gap: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.record-filters img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .record-form {

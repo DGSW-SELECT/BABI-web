@@ -28,10 +28,11 @@ export default function VaccinationPage({ schedules, onChangeStatus }: Vaccinati
   const nextSchedule = pending.find((item) => item.scheduledDate >= today)
 
   return (
-    <main className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
-      <div className="page-title-header" aria-hidden="true" />
-      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pt-3 pb-6 max-[360px]:px-3">
+    <main className="page-content-start flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
+      <div className="shrink-0 px-5 max-[360px]:px-3">
         <CalendarTabs />
+      </div>
+      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pb-6 max-[360px]:px-3">
         <section aria-label="다음 접종 예정" className="min-h-[166px] rounded-[17px] border border-[#aa83ff] bg-[#f0edf8] px-[30px] py-[18px] max-[360px]:px-5">
           <h2 className="text-sm font-bold">다음 접종 예정</h2>
           {nextSchedule ? <>

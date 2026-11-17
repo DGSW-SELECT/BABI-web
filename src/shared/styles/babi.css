@@ -27,7 +27,6 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 /* 본문 */
 .babi-main{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto}
 .babi-screen{flex:1 0 auto;width:100%;display:flex;flex-direction:column;align-items:center;padding:8px 20px 24px;text-align:center}
-.babi-screen--voice{min-height:100%}
 .babi-screen--left{align-items:stretch;text-align:left}
 .babi-screen h2{font-family:inherit;color:var(--ink);font-size:26px;font-weight:900;line-height:1.3;letter-spacing:normal;margin:6px 0 4px}
 .babi-title-left{font-size:22px!important;margin-top:10px!important}
@@ -41,10 +40,6 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 .babi-btn:focus-visible,.babi-act__go:focus-visible{outline:3px solid var(--blue2);outline-offset:2px}
 .babi-btn:disabled{opacity:.6;cursor:default}
 .babi-btn--dark{background:#000;color:#fff}.babi-btn--grey{background:#D5D8DD;color:var(--ink)}
-.babi-note{width:100%;background:var(--blue);padding:24px 20px;text-align:left;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,.14);margin:16px 0 20px;position:relative}
-.babi-note::before{content:"";position:absolute;top:-13px;left:28px;width:14px;height:40px;border:3px solid #37699F;border-radius:9px;transform:rotate(-7deg);background:transparent}
-.babi-note b{display:block;font-size:17px;margin-bottom:10px}
-.babi-tags{display:flex;gap:6px;flex-wrap:wrap}.babi-tags span{background:#fff;border-radius:999px;padding:4px 10px;font-size:12px}
 .babi-wave{display:flex;gap:4px;align-items:center;height:40px;margin:6px 0}
 .babi-wave i{width:5px;border-radius:3px;background:var(--mint2);height:10px;animation:babi-w .9s ease-in-out infinite}
 @keyframes babi-w{50%{height:36px}}
@@ -64,10 +59,6 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 .babi-result{width:100%}
 .babi-col{display:flex;flex-direction:column;align-items:center}
 .babi-hint.babi-error{color:#D64545}
-.babi-feature-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;color:#7895B4;font-size:13px;font-weight:700;text-decoration:none}
-.babi-feature-links{display:flex;flex-direction:column;align-items:center}
-.babi-feature-link span{font-size:19px;line-height:1}
-.babi-feature-link:focus-visible{outline:2px solid var(--blue2);outline-offset:3px;border-radius:4px}
 
 /* 녹음 중 화면: 참고 화면처럼 전체 배경을 회색으로 낮추고 안내 문구를 분리 */
 .babi-phone:has(.babi-screen--recording){background:#626262;color:#111}
@@ -88,24 +79,87 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 #root>div:has(.babi-screen--recording)>div:last-child footer nav{opacity:.48}
 #root>div:has(.babi-screen--recording)>div:last-child footer button{background:transparent}
 .babi-screen--recording{padding-top:0}
-.babi-screen--voice>header{padding-top:12px}
 .babi-screen--recording>header{opacity:.38}
-.babi-recording-mascot{position:relative;display:block;width:170px;flex:none;margin:34px 0 12px;line-height:0}
-.babi-recording-mascot .babi-mascot{display:block;width:100%!important;height:auto;margin:0;opacity:.3;filter:grayscale(.25) brightness(.85);image-rendering:auto}
-.babi-live-caption{margin:12px 0 0;color:#fff;font-size:17px;font-weight:600;line-height:1.5}
 .babi-screen--recording .babi-spacer{flex:1}
 .babi-screen--recording .babi-mic{margin-top:18px}
 .babi-screen--recording .babi-hint{color:rgba(255,255,255,.58)}
-.babi-screen--voice-idle .babi-spacer{flex:0 0 clamp(40px,9vh,76px)}
 .babi-screen--cry .babi-spacer{flex:0 0 clamp(40px,9vh,76px)}
-.babi-screen--voice-idle h2{font-size:30px;line-height:1.28}
-.babi-screen--voice-confirm .babi-note{width:100%;max-width:286px;min-height:286px;margin:18px 0 30px;padding:48px 20px 68px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#D7F1FA;border-radius:2px}
-.babi-screen--voice-confirm .babi-note::before{top:-16px;left:34px;width:22px;height:64px;border-width:4px}
-.babi-screen--voice-confirm .babi-note b{font-size:17px;line-height:1.5;margin:0 0 10px}
-.babi-screen--voice-confirm .babi-tags{justify-content:center}
-.babi-note__mascot{position:absolute;right:10px;bottom:8px;width:48px!important;margin:0!important}
-.babi-screen--voice-confirm h2,.babi-screen--voice:has(.babi-feature-links) h2{font-size:34px;line-height:1.2;-webkit-text-stroke:5px #fff;paint-order:stroke fill;text-shadow:0 1px 1px rgba(0,0,0,.08)}
-.babi-screen--voice-confirm>.babi-btn,.babi-screen--voice:has(.babi-feature-links)>.babi-btn{width:100%;max-width:320px;min-height:60px;margin-top:10px}
+
+/* 로컬 홈·녹음 화면 */
+.babi-screen--voice-home {
+  position:relative;display:block;flex:none;width:100%;height:100%;min-height:0;
+  padding:0;overflow:hidden;text-align:center;
+  font-family:'BABI Pretendard',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;
+}
+.babi-voice-mascot{position:absolute;top:10%;left:50%;width:180px;transform:translateX(-50%)}
+.babi-voice-mascot .babi-mascot{max-width:100%;margin:0}
+.babi-screen--voice-home .babi-voice-title {
+  position:absolute;top:45%;left:20px;right:20px;margin:0;
+  font-family:'BabiAggro',sans-serif;
+  color:#050505;font-size:clamp(30px,10vw,40px);font-weight:500;line-height:1.2;letter-spacing:-1.5px;
+  -webkit-text-stroke:12px #fff;paint-order:stroke fill;
+}
+.babi-voice-title span{display:block}
+.babi-voice-controls{position:absolute;bottom:6%;left:20px;right:20px;display:flex;flex-direction:column;align-items:center}
+.babi-voice-mic {
+  display:grid;place-items:center;width:130px;height:130px;flex:none;padding:6px;
+  border:2px solid #b4faf3;border-radius:50%;
+  background:linear-gradient(135deg,#d4fcf8,#b8f8f0) content-box;cursor:pointer;
+}
+.babi-voice-mic:focus-visible{outline:3px solid #5a8584;outline-offset:5px}
+.babi-voice-hint{margin:20px 0 0;color:#c3c6c8;font-size:10px;line-height:14px}
+.babi-voice-hint--error{color:#c23c3c;font-size:12px}
+/* 헤더·푸터도 어둡게 하되 종료 버튼과 안내 문구는 앞에 둔다. */
+#root>div:has(.babi-screen--voice-recording)::after{content:"";position:absolute;inset:0;z-index:60;background:rgb(0 0 0 / 60%)}
+.babi-screen--voice-recording .babi-voice-controls{z-index:70}
+.babi-voice-caption{position:absolute;top:48%;left:20px;right:20px;z-index:70;margin:0;color:#fff;font-size:18px;line-height:1.5}
+.babi-screen--voice-recording .babi-voice-hint{color:#c3c6c8}
+.babi-voice-mic.is-recording{background:linear-gradient(135deg,#b8fff6,#a5f7ed);animation:babi-voice-glow 1.8s ease-in-out infinite}
+@keyframes babi-voice-glow{0%,100%{box-shadow:0 0 5px 7px #adfff1,0 0 16px 10px rgb(173 255 241 / 55%)}50%{box-shadow:0 0 7px 9px #adfff1,0 0 24px 14px rgb(173 255 241 / 65%)}}
+@media (max-height:760px){
+  .babi-voice-mascot{width:160px}
+  .babi-voice-mic{width:116px;height:116px}
+  .babi-screen--voice-home .babi-voice-title{font-size:clamp(30px,10vw,36px)}
+}
+@media (max-height:650px){
+  .babi-voice-mascot{width:clamp(110px,22vh,140px)}
+  .babi-voice-mic{width:clamp(88px,15.4vh,100px);height:clamp(88px,15.4vh,100px)}
+  .babi-screen--voice-home .babi-voice-title{font-size:clamp(26px,4.6vh,30px)}
+}
+@media (prefers-reduced-motion:reduce){.babi-voice-mic.is-recording{animation:none;box-shadow:0 0 12px 9px rgb(173 255 241 / 65%)}}
+
+/* 녹음 후 분석·내용 확인·저장 완료 */
+.babi-voice-shell .babi-screen--voice{min-height:0;flex:1 1 auto;overflow-y:auto}
+.babi-voice-shell .babi-screen--voice h2{font-family:'BabiAggro',sans-serif;font-size:clamp(30px,10vw,40px);font-weight:500;line-height:1.2;letter-spacing:-1.5px;word-break:keep-all;-webkit-text-stroke:12px #fff;stroke-linejoin:round;paint-order:stroke fill;text-shadow:none}
+.babi-voice-shell .babi-screen--voice-confirm,.babi-voice-shell .babi-screen--voice-done{display:grid;grid-template-rows:minmax(min-content,1fr) auto;align-items:stretch;gap:24px;padding:0 38px clamp(32px,9vh,76px)}
+.babi-voice-confirm-content,.babi-voice-result-content{display:flex;flex-direction:column;align-items:center;gap:clamp(28px,6vh,50px);padding-top:clamp(32px,6vh,50px)}
+.babi-voice-result-content{gap:clamp(28px,5.5vh,46px);padding-top:clamp(32px,7.2vh,60px)}
+.babi-voice-result-mascot{width:180px;flex:none}
+.babi-voice-result-mascot .babi-mascot{max-width:100%;margin:0}
+.babi-voice-shell .babi-screen--voice-confirm h2,.babi-voice-shell .babi-screen--voice-done h2{margin:0}
+.babi-voice-shell .babi-note{position:relative;display:flex;flex:none;align-items:center;justify-content:center;width:min(246px,100%);height:246px;padding:48px 20px 70px;background:#d5f0f9;box-shadow:3px 4px 3px rgb(0 0 0 / 22%)}
+.babi-note__clip{position:absolute;top:-10px;left:24px;transform:rotate(-5deg)}
+.babi-note__text{width:100%;max-height:100%;overflow-y:auto;margin:0;color:#111;font-size:18px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere}
+.babi-note__mascot{position:absolute;right:14px;bottom:14px;max-width:56px;margin:0}
+.babi-voice-actions{display:flex;flex-direction:column;gap:10px}
+.babi-voice-actions .babi-btn{min-height:55px;margin:0;padding:12px;font-size:14px;font-weight:400}
+.babi-voice-actions .babi-btn--dark{background:#111}
+.babi-voice-actions .babi-btn--grey{border:1px solid #bdbdbd;background:#d8d8d8;color:#161616}
+.babi-voice-actions .babi-error{margin:0}
+@media (max-height:760px){.babi-voice-shell .babi-screen--voice h2{font-size:clamp(30px,10vw,36px)}}
+@media (max-height:650px){
+  .babi-voice-confirm-content,.babi-voice-result-content{gap:26px;padding-top:24px}
+  .babi-voice-result-mascot{width:136px}
+  .babi-voice-shell .babi-note{width:min(190px,100%);height:190px;padding:36px 16px 58px}
+  .babi-note__text{font-size:16px}
+  .babi-note__mascot{right:10px;bottom:10px;max-width:42px}
+  .babi-voice-shell .babi-screen--voice h2{font-size:30px}
+  .babi-voice-actions .babi-btn{min-height:48px}
+}
+@media (max-width:360px){.babi-voice-shell .babi-screen--voice-confirm,.babi-voice-shell .babi-screen--voice-done{padding-right:20px;padding-left:20px}}
+
+/* 앱 프레임 안에서 AI 보조 화면의 하단 버튼까지 스크롤한다. */
+.babi-screen--cry,.babi-screen--activity{height:100%;min-height:0;max-height:100%;flex:1 1 auto;overflow-y:auto}
 
 /* 활동 추천 */
 .babi-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}

@@ -5,7 +5,7 @@ import Modal from '../../shared/components/Modal'
 import type { GrowthRecord } from '../growth/growthData'
 import { getDayLabel, getVaccinationTitle } from '../vaccination/vaccinationData'
 import type { VaccinationSchedule } from '../vaccination/vaccinationData'
-import { formatScheduleDate, formatScheduleTime, getDateKey, getMonthDays } from './scheduleData'
+import { formatScheduleDate, formatScheduleTime, getDateKey, getMonthDays, isValidScheduleDate } from './scheduleData'
 import type { Schedule } from './scheduleData'
 
 type SchedulePageProps = {
@@ -60,21 +60,18 @@ export default function SchedulePage({ schedules, records, vaccinations, selecte
   }
 
   return (
-    <main aria-label="일정 캘린더" className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
-      <div className="page-title-header" aria-hidden="true" />
-      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pt-3 pb-6 max-[360px]:px-3">
+    <main aria-label="일정 캘린더" className="page-content-start flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
+      <div className="shrink-0 px-5 max-[360px]:px-3">
         <CalendarTabs />
-        <div className="mb-2 flex justify-end">
-          <button type="button" onClick={selectToday}
-            className="min-h-8 cursor-pointer rounded-lg border border-[#d6d6d6] bg-white px-3 text-xs font-medium text-[#515151] hover:bg-[#eef6ff] focus-visible:outline-2 focus-visible:outline-[#4d9fff]">오늘로 가기</button>
-        </div>
+      </div>
+      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-5 pb-6 max-[360px]:px-3">
         <section aria-label="월별 달력" className="rounded-[17px] border border-[#d6d6d6] bg-white px-3 pt-3 pb-2">
           <div className="mb-3 flex items-center justify-between">
             <button type="button" aria-label="이전 달" onClick={() => moveMonth(-1)}
               className="flex size-10 cursor-pointer items-center justify-center rounded-xl hover:bg-[#f7f8f9] focus-visible:outline-2 focus-visible:outline-[#4d9fff]">
               <MonthArrow />
             </button>
-            <h1 aria-live="polite" className="text-lg font-semibold">{month.getFullYear()}년 {month.getMonth() + 1}월</h1>
+            <h2 aria-live="polite" className="text-lg font-semibold">{month.getFullYear()}년 {month.getMonth() + 1}월</h2>
             <button type="button" aria-label="다음 달" onClick={() => moveMonth(1)}
               className="flex size-10 cursor-pointer items-center justify-center rounded-xl hover:bg-[#f7f8f9] focus-visible:outline-2 focus-visible:outline-[#4d9fff]">
               <MonthArrow next />
@@ -106,6 +103,28 @@ export default function SchedulePage({ schedules, records, vaccinations, selecte
             })}
           </div>
         </section>
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            type="date"
+            aria-label="이동할 날짜"
+            value={selectedDate}
+            max="9999-12-31"
+            onInput={(event) => {
+              const date = event.currentTarget.value
+              if (isValidScheduleDate(date)) selectDate(new Date(`${date}T12:00:00`))
+            }}
+            onClick={(event) => {
+              try {
+                event.currentTarget.showPicker?.()
+              } catch {
+                // 날짜 선택기를 직접 열 수 없으면 브라우저의 기본 입력 동작을 사용합니다.
+              }
+            }}
+            className="min-h-12 min-w-0 flex-1 cursor-pointer rounded-2xl border border-[#d6d6d6] bg-white px-3 text-base text-[#121212] focus-visible:outline-2 focus-visible:outline-[#4d9fff]"
+          />
+          <button type="button" onClick={selectToday}
+            className="min-h-11 shrink-0 cursor-pointer rounded-xl border border-[#d6d6d6] bg-white px-3 text-xs font-medium text-[#515151] hover:bg-[#eef6ff] focus-visible:outline-2 focus-visible:outline-[#4d9fff]">오늘로 가기</button>
+        </div>
         <section aria-label="선택한 날짜 기록" className="mt-3">
           <h2 className="mb-2 text-base font-bold">{formatScheduleDate(selectedDate)}</h2>
           <div className="space-y-2.5">
