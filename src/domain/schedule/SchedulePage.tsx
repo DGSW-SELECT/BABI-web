@@ -60,7 +60,7 @@ export default function SchedulePage({ schedules, records, vaccinations, selecte
   }
 
   return (
-    <main aria-label="일정 캘린더" className="page-content-start flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
+    <main aria-label="일정 캘린더" className="calendar-tab-page page-content-start flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-sm text-[#121212]">
       <div className="shrink-0 px-5 max-[360px]:px-3">
         <CalendarTabs />
       </div>

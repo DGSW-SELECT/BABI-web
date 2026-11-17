@@ -42,11 +42,11 @@ export async function mockAnalyzeCry(): Promise<CryAnalysisResult> {
 
 const POOL = [
   { id: 1, icon: "🧸", title: "까꿍 놀이", desc: "10분 · 대상 영속성 발달" },
-  { id: 2, icon: "🤸", title: "터미타임 놀이", desc: "15분 · 목·등 근력 발달" },
+  { id: 2, icon: "🤸", title: "엎드리기 놀이", desc: "15분 · 목·등 근력 발달" },
   { id: 3, icon: "🎵", title: "노래 들려주기", desc: "10분 · 언어 자극" },
   { id: 4, icon: "🫧", title: "비눗방울 보기", desc: "10분 · 시각 추적" },
-  { id: 5, icon: "📖", title: "헝겊책 읽기", desc: "10분 · 촉각·언어" },
-  { id: 6, icon: "🥁", title: "소리 나는 장난감", desc: "10분 · 청각 자극" },
+  { id: 5, icon: "📖", title: "책 읽기", desc: "10분 · 촉각·언어" },
+  { id: 6, icon: "🥁", title: "딸랑이 놀이", desc: "10분 · 청각 자극" },
 ];
 
 export async function mockRecommendations(page: number): Promise<Recommendation> {

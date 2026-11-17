@@ -158,7 +158,7 @@ function AppLayout() {
 
   const showHeaderPreview = ENABLE_HEADER_PREVIEW && headerPreviewPaths.includes(pathname);
   const showHeader = pathname === "/voice-record" || pathname.startsWith("/ai-report") || showHeaderPreview;
-  const { height, offsetTop, isEditing, finishEditing } =
+  const { height, offsetTop, hideFooter, finishEditing } =
     useInputViewport(containerRef);
 
   function closeGrowthForm() {
@@ -353,7 +353,7 @@ function AppLayout() {
           />
         </Routes>
       </div>
-      {!isEditing && (
+      {!hideFooter && (
         <div className="relative h-[87px] shrink-0">
           <Footer />
         </div>

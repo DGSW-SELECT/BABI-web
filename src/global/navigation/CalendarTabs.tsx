@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router'
+import './CalendarTabs.css'
 
 type CalendarTab = 'schedule' | 'growth' | 'vaccination'
 
@@ -26,14 +27,23 @@ export default function CalendarTabs() {
   const { pathname } = useLocation()
   const selectedTab = pathname.startsWith('/vaccination') ? 'vaccination' : pathname.startsWith('/growth') ? 'growth' : 'schedule'
 
+  function changeTab(nextTab: CalendarTab) {
+    if (nextTab === selectedTab) return
+    const currentIndex = calendarTabs.findIndex((tab) => tab.key === selectedTab)
+    const nextIndex = calendarTabs.findIndex((tab) => tab.key === nextTab)
+    document.documentElement.setAttribute('data-calendar-tab-direction', nextIndex > currentIndex ? 'next' : 'previous')
+    navigate('/' + nextTab, { viewTransition: !window.matchMedia('(prefers-reduced-motion: reduce)').matches })
+  }
+
   return (
     <nav className="mb-4 grid grid-cols-3 rounded-[17px] border border-[#d6d6d6] bg-white" aria-label="캘린더 메뉴">
       {calendarTabs.map((tab) => (
-        <button key={tab.key} type="button" onClick={() => navigate(`/${tab.key}`)}
+        <button key={tab.key} type="button" onClick={() => changeTab(tab.key)}
           className={`flex min-h-12 items-center justify-center gap-[7px] rounded-2xl border px-[2px] py-2 text-base leading-normal font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#256b3c] max-[360px]:gap-1 max-[360px]:text-sm ${tab.colorClassName} ${
             tab.key === selectedTab ? tab.selectedClassName : 'border-transparent bg-transparent'
           }`}
-          aria-current={tab.key === selectedTab ? 'page' : undefined}>
+          aria-current={tab.key === selectedTab ? 'page' : undefined}
+          style={tab.key === selectedTab ? { viewTransitionName: 'calendar-selected-tab' } : undefined}>
           <CalendarTabIcon tab={tab.key} />
           {tab.label}
         </button>

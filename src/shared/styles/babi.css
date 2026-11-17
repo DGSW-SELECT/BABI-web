@@ -253,3 +253,8 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 .babi-nav a.is-disabled{opacity:.55;cursor:default}
 .babi-nav a:focus-visible{outline:3px solid var(--blue2);outline-offset:2px}
 @media (max-width:480px){.babi-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}}
+
+.babi-screen--activity .babi-act__go,
+.babi-act__go{display:none!important}
+
+.babi-screen--cry{padding-bottom:32px}
