@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { useState } from 'react'
 import Modal from '../../shared/components/Modal'
 import { aiReportBaby, aiReportComment, aiReportData, aiReportDate } from './aiReportData'
@@ -10,26 +11,42 @@ const cardColors = {
   crying: 'border-[#ffa58b] bg-[#faf2ee] text-[#ffa58b]',
 }
 
-export default function AiReportPage() {
+type AiReportPageProps = {
+  items?: AiReportItem[]
+  babyName?: string
+  date?: string
+  comment?: string
+  period?: string
+  onBack?: () => void
+}
+
+export default function AiReportPage({ items = aiReportData, babyName = aiReportBaby.name, date = aiReportDate, comment = aiReportComment, period, onBack }: AiReportPageProps = {}) {
   const [selectedType, setSelectedType] = useState<AiReportType | null>(null)
-  const selectedReport = aiReportData.find((report) => report.type === selectedType)
+  const selectedReport = items.find((report) => report.type === selectedType)
 
   return (
-    <main aria-label={`${aiReportBaby.name} ${aiReportDate} AI 육아 리포트`} className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-[#101010]">
-      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-[30px] pb-8 max-[360px]:px-5">
-        <h1 className="mt-10 text-center text-[22px] leading-[31px] font-medium tracking-[-0.5px] [@media(max-height:760px)]:mt-6">BABI의 육아 리포트</h1>
-        <div className="mt-[38px] grid grid-cols-2 gap-x-[14px] gap-y-5 [@media(max-height:760px)]:mt-6">
-          {aiReportData.map((report) => <AiReportCard key={report.type} report={report} onClick={() => setSelectedType(report.type)} />)}
+    <main aria-label={`${babyName} ${period ?? date} AI 육아 리포트`} className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-[#101010]">
+      <div data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-none px-[30px] pt-[var(--page-title-offset)] pb-8 max-[360px]:px-5">
+        <div className="relative">
+          {onBack && <button type="button" aria-label="리포트 목록으로 돌아가기" onClick={onBack} className="absolute -left-3 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl hover:bg-[#edf2f6] focus-visible:outline-2 focus-visible:outline-[#7895bb]">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
+          </button>}
+          <h1 className="page-title">BABI의 육아 리포트</h1>
+        </div>
+        {period && <p className="mt-2 text-center text-xs leading-5 text-[#78848f]">{period}</p>}
+        <div className="mt-[var(--page-title-gap)] grid grid-cols-2 gap-x-[14px] gap-y-5">
+          {items.map((report) => <AiReportCard key={report.type} report={report} onClick={() => setSelectedType(report.type)} />)}
         </div>
         <section aria-label="BABI의 한마디" className="mt-7 grid min-h-[145px] grid-cols-[minmax(0,1fr)_96px] items-center gap-4 rounded-[17px] border border-[#d6d6d6] bg-white px-4 py-4 max-[360px]:grid-cols-[minmax(0,1fr)_76px] max-[360px]:gap-3 max-[360px]:px-3">
           <div className="min-w-0">
             <h2 className="text-center text-base leading-6 font-medium text-[#399fff] max-[360px]:text-sm">BABI의 한마디</h2>
-            <p className="relative mt-2 rounded-[32px] bg-[#f7f8f9] px-3 py-2 text-center text-xs leading-6 whitespace-pre-line break-keep after:absolute after:top-1/2 after:-right-2 after:-translate-y-1/2 after:border-y-[7px] after:border-l-[12px] after:border-y-transparent after:border-l-[#f7f8f9] max-[360px]:px-2 max-[360px]:text-[11px] max-[360px]:leading-5">{aiReportComment}</p>
+            <p className="relative mt-2 rounded-[32px] bg-[#f7f8f9] px-3 py-2 text-center text-xs leading-6 whitespace-pre-line break-keep after:absolute after:top-1/2 after:-right-2 after:-translate-y-1/2 after:border-y-[7px] after:border-l-[12px] after:border-y-transparent after:border-l-[#f7f8f9] max-[360px]:px-2 max-[360px]:text-[11px] max-[360px]:leading-5">{comment}</p>
           </div>
           <img src="/ai-report-mascot.svg" alt="BABI 코끼리 캐릭터" width="96" height="115" className="h-[115px] w-full object-contain max-[360px]:h-24" />
         </section>
+        {!onBack && <Link to="/ai-report/records" className="mt-4 block py-2 text-center text-xs text-[#7895bb] underline underline-offset-4">리포트 기록 보기</Link>}
       </div>
-      {selectedReport && <AiReportDetailModal report={selectedReport} onClose={() => setSelectedType(null)} />}
+      {selectedReport && <AiReportDetailModal report={selectedReport} subtitle={`${babyName} · ${period ?? date.replaceAll('-', '. ')}`} timelineLabel={period ?? date.replaceAll('-', '. ')} onClose={() => setSelectedType(null)} />}
     </main>
   )
 }
@@ -41,7 +58,7 @@ function AiReportCard({ report, onClick }: { report: AiReportItem; onClick: () =
   return (
     <article aria-label={`${report.name} 요약`} className="min-w-0">
       <button type="button" aria-label={`${report.name} 상세 정보`} aria-haspopup="dialog" onClick={onClick}
-        className={`flex h-full min-h-[148px] w-full cursor-pointer flex-col rounded-[17px] border px-[10px] pt-4 pb-[15px] text-left hover:brightness-[0.99] focus:outline-none focus-visible:brightness-95 [@media(max-height:760px)]:min-h-[132px] [@media(max-height:760px)]:py-3 ${cardColors[report.type]}`}>
+        className={`flex h-full min-h-[148px] w-full cursor-pointer flex-col rounded-[17px] border px-[10px] pt-4 pb-[15px] text-left transition duration-200 ease-out hover:shadow-[0_10px_22px_rgba(63,82,103,0.16)] motion-safe:hover:-translate-y-1 motion-safe:hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7895bb] focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] motion-reduce:transition-none [@media(max-height:760px)]:min-h-[132px] [@media(max-height:760px)]:py-3 ${cardColors[report.type]}`}>
         <AiReportIcon type={report.type} />
         <span className="mt-[7px] text-[13px] leading-[18px] font-medium text-[#8e979b]">{report.name}</span>
         <span className="mt-[7px] text-base leading-[22px] font-bold">{value}</span>
@@ -59,12 +76,12 @@ const reportStyles = {
   crying: { label: '총 울음 시간', background: 'bg-[#fff0e9]', text: 'text-[#ce7a53]', marker: 'border-[#e2b49e] bg-[#fff3ed] text-[#aa6749]' },
 }
 
-function AiReportDetailModal({ report, onClose }: { report: AiReportItem; onClose: () => void }) {
+function AiReportDetailModal({ report, subtitle, timelineLabel, onClose }: { report: AiReportItem; subtitle: string; timelineLabel: string; onClose: () => void }) {
   const style = reportStyles[report.type]
   const recentRecords = report.records.slice(-3)
 
   return (
-    <Modal title={`${report.name} 상세 정보`} subtitle={`${aiReportBaby.name} · ${aiReportDate.replaceAll('-', '. ')}`} onClose={onClose}
+    <Modal title={`${report.name} 상세 정보`} subtitle={subtitle} onClose={onClose}
       icon={<span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${style.background} ${style.text}`}><AiReportIcon type={report.type} size={27} /></span>}>
       <section aria-label="핵심 수치" className={`rounded-[17px] border-0 p-4 ${cardColors[report.type]}`}>
         <dl className="grid grid-cols-[minmax(0,1fr)_84px] gap-3">
@@ -91,7 +108,7 @@ function AiReportDetailModal({ report, onClose }: { report: AiReportItem; onClos
           <h3 className="text-[13px] font-bold text-[#172027]">기록 타임라인</h3>
           <span className="rounded-full bg-[#edf2f5] px-2.5 py-1 text-[11px] font-medium text-[#536975]">최근 {recentRecords.length}회</span>
         </div>
-        <p className="mt-3 mb-3 pl-[38px] text-[11px] font-medium text-[#64727a]">{aiReportDate.replaceAll('-', '. ')}</p>
+        <p className="mt-3 mb-3 pl-[38px] text-[11px] font-medium text-[#64727a]">{timelineLabel}</p>
         <div className="relative">
           {recentRecords.length > 1 && <span aria-hidden="true" className="pointer-events-none absolute top-[14px] bottom-[14px] left-[13px] w-0.5 bg-[#dbe2e6]" />}
           <ol className="space-y-3.5">
