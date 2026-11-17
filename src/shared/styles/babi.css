@@ -97,7 +97,6 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
   position:absolute;top:45%;left:20px;right:20px;margin:0;
   font-family:'BabiAggro',sans-serif;
   color:#050505;font-size:clamp(30px,10vw,40px);font-weight:500;line-height:1.2;letter-spacing:-1.5px;
-  -webkit-text-stroke:12px #fff;paint-order:stroke fill;
 }
 .babi-voice-title span{display:block}
 .babi-voice-controls{position:absolute;bottom:6%;left:20px;right:20px;display:flex;flex-direction:column;align-items:center}
@@ -130,7 +129,7 @@ body{display:block;place-items:initial;min-width:0;margin:0;background:#E9ECEF;c
 
 /* 녹음 후 분석·내용 확인·저장 완료 */
 .babi-voice-shell .babi-screen--voice{min-height:0;flex:1 1 auto;overflow-y:auto}
-.babi-voice-shell .babi-screen--voice h2{font-family:'BabiAggro',sans-serif;font-size:clamp(30px,10vw,40px);font-weight:500;line-height:1.2;letter-spacing:-1.5px;word-break:keep-all;-webkit-text-stroke:12px #fff;stroke-linejoin:round;paint-order:stroke fill;text-shadow:none}
+.babi-voice-shell .babi-screen--voice h2{font-family:'BabiAggro',sans-serif;font-size:clamp(30px,10vw,40px);font-weight:500;line-height:1.2;letter-spacing:-1.5px;word-break:keep-all;text-shadow:none}
 .babi-voice-shell .babi-screen--voice-confirm,.babi-voice-shell .babi-screen--voice-done{display:grid;grid-template-rows:minmax(min-content,1fr) auto;align-items:stretch;gap:24px;padding:0 38px clamp(32px,9vh,76px)}
 .babi-voice-confirm-content,.babi-voice-result-content{display:flex;flex-direction:column;align-items:center;gap:clamp(28px,6vh,50px);padding-top:clamp(32px,6vh,50px)}
 .babi-voice-result-content{gap:clamp(28px,5.5vh,46px);padding-top:clamp(32px,7.2vh,60px)}
