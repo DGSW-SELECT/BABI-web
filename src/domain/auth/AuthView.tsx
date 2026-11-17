@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { sendSignupVerification, signup as signupAccount, verifySignupEmail } from "../../global/api/auth";
 
 function GoogleLogo() {
   const parts = [
@@ -99,11 +100,21 @@ function Field({
   );
 }
 
-export function Verification({ onClose }: { onClose: () => void }) {
+export function Verification({
+  email,
+  onClose,
+  onVerified,
+}: {
+  email: string;
+  onClose: () => void;
+  onVerified: (token: string) => void;
+}) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const [digits, setDigits] = useState(Array<string>(6).fill(""));
   const [remainingSeconds, setRemainingSeconds] = useState(120);
   const [expiresAt, setExpiresAt] = useState(() => Date.now() + 120_000);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const updateRemainingTime = () => {
@@ -200,20 +211,47 @@ export function Verification({ onClose }: { onClose: () => void }) {
         <p role="timer" aria-label="인증번호 남은 시간" className="mt-9 text-[15px] leading-[18px] text-[#959292]">
           {remainingTime}
         </p>
+        {error && <p role="alert" className="mt-4 px-6 text-sm text-red-700">{error}</p>}
         <button
           type="button"
-          onClick={onClose}
+          disabled={pending || digits.some((digit) => !digit)}
+          onClick={async () => {
+            if (pending) return;
+            setPending(true);
+            setError("");
+            try {
+              const result = await verifySignupEmail(email, digits.join(""));
+              if (!result.verified || !result.verificationToken) {
+                throw new Error("이메일 인증을 완료하지 못했어요. 인증번호를 확인해주세요.");
+              }
+              onVerified(result.verificationToken);
+            } catch (verificationError) {
+              setError(verificationError instanceof Error ? verificationError.message : "인증번호를 확인하지 못했어요.");
+            } finally {
+              setPending(false);
+            }
+          }}
           className="mx-4 mt-[26px] h-[65px] w-[calc(100%-32px)] rounded-[10px] bg-[#111] text-xl text-white hover:bg-[#292929]"
         >
-          인증하기
+          {pending ? "확인 중…" : "인증하기"}
         </button>
         <button
           type="button"
-          onClick={() => {
-            setDigits(Array<string>(6).fill(""));
-            setRemainingSeconds(120);
-            setExpiresAt(Date.now() + 120_000);
-            refs.current[0]?.focus();
+          disabled={pending}
+          onClick={async () => {
+            setPending(true);
+            setError("");
+            try {
+              await sendSignupVerification(email);
+              setDigits(Array<string>(6).fill(""));
+              setRemainingSeconds(120);
+              setExpiresAt(Date.now() + 120_000);
+              refs.current[0]?.focus();
+            } catch (resendError) {
+              setError(resendError instanceof Error ? resendError.message : "인증번호를 다시 보내지 못했어요.");
+            } finally {
+              setPending(false);
+            }
           }}
           className="mt-8 text-[13px] text-[#393838] underline underline-offset-4"
         >
@@ -230,6 +268,10 @@ export default function AuthView({ onLogin }: { onLogin: (email: string, passwor
   const signup = location.pathname === "/signup";
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [verificationOpen, setVerificationOpen] = useState(false);
+  const [verificationToken, setVerificationToken] = useState("");
+  const [verifiedEmail, setVerifiedEmail] = useState("");
+  const [verificationEmail, setVerificationEmail] = useState("");
   const busy = useRef(false);
   const notice = typeof location.state?.notice === "string" ? location.state.notice : "";
 
@@ -257,7 +299,19 @@ export default function AuthView({ onLogin }: { onLogin: (email: string, passwor
     setError("");
     try {
       if (signup) {
-        setError("회원가입은 아직 연결되지 않았어요.");
+        if (!verificationToken || verifiedEmail !== email) {
+          setVerificationToken("");
+          setVerifiedEmail("");
+          await sendSignupVerification(email);
+          setVerificationEmail(email);
+          setVerificationOpen(true);
+          return;
+        }
+        await signupAccount({ ...input, verificationToken });
+        navigate(`/login${location.search}`, {
+          replace: true,
+          state: { notice: "회원가입이 완료되었어요. 로그인해주세요." },
+        });
       } else {
         await onLogin(email, password);
       }
@@ -311,7 +365,7 @@ export default function AuthView({ onLogin }: { onLogin: (email: string, passwor
           disabled={pending}
           className={`disabled:opacity-50 h-14 w-full rounded-[10px] bg-[#111] text-[18px] text-white transition-colors hover:bg-[#292929] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7895bb] ${signup ? "mt-[54px]" : "mt-8"}`}
         >
-          {pending ? "처리 중…" : signup ? "회원가입" : "로그인"}
+          {pending ? "처리 중…" : signup ? (verificationToken && verifiedEmail ? "회원가입" : "이메일 인증하기") : "로그인"}
         </button>
         {signup ? (
           <p className="mt-[15px] text-center text-[13px] leading-[18px] text-[#868282]">
@@ -367,6 +421,17 @@ export default function AuthView({ onLogin }: { onLogin: (email: string, passwor
             </button>
           </div>
         </div>
+      )}
+      {signup && verificationOpen && (
+        <Verification
+          email={verificationEmail}
+          onClose={() => setVerificationOpen(false)}
+          onVerified={(token) => {
+            setVerificationToken(token);
+            setVerifiedEmail(verificationEmail);
+            setVerificationOpen(false);
+          }}
+        />
       )}
     </main>
   );
