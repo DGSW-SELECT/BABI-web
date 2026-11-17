@@ -27,7 +27,7 @@ function BabyIcon() {
 function HeaderAction({ label, children, onClick, unread = false }: {
   label: string; children: ReactNode; onClick?: () => void; unread?: boolean
 }) {
-  return <button type="button" disabled={!onClick} onClick={onClick} aria-label={onClick ? label : `${label} (연결 전)`} aria-haspopup="dialog"
+  return <button type="button" disabled={!onClick} onClick={onClick} aria-label={label} aria-haspopup="dialog"
     className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-[#a5b2b7] text-white enabled:cursor-pointer enabled:hover:bg-[#8c9fa7] focus:outline-none focus-visible:bg-[#718e9b]">
     {children}{unread && <span aria-hidden="true" className="absolute top-0 right-0 size-2 rounded-full border border-[#f7f8f9] bg-[#399fff]" />}
   </button>
@@ -49,9 +49,14 @@ export default function Header({ baby, babies = [baby], notifications = [], onBa
   return (
     <>
       <header className="babi-header flex shrink-0 items-center justify-between gap-3 px-8 max-[360px]:px-5">
-        <BabySwitcher baby={baby} babies={babies} onBabyChange={onBabyChange} avatar={<BabyIcon />} />
+        <BabySwitcher baby={baby} babies={babies} onBabyChange={onBabyChange} avatar={baby.photoUrl ? <img src={baby.photoUrl} alt="" className="size-9 rounded-full object-cover" /> : <BabyIcon />} />
         <div className="flex shrink-0 gap-[7px] max-[360px]:gap-1">
-          <HeaderAction label="인수인계" onClick={onHandoff}><svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11s4.5 8 10 8h3l5 3v-6c1.3-1.4 2-3.2 2-5 0-4.4-4.5-8-10-8Z" /><g fill="#a5b2b7"><circle cx="7" cy="11" r="1" /><circle cx="12" cy="11" r="1" /><circle cx="17" cy="11" r="1" /></g></svg></HeaderAction>
+          <HeaderAction label="인수인계" onClick={onHandoff}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3M14 3h1a2 2 0 0 1 2 2v3" />
+              <rect x="8" y="1.5" width="6" height="4" rx="1" /><path d="M7 9h5M7 13h2M12 15h10m-4-4 4 4-4 4" />
+            </svg>
+          </HeaderAction>
           <HeaderAction label="알림" unread={hasUnread} onClick={() => setPanel('notifications')}><svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M5 16V9a7 7 0 0 1 14 0v7l2 3H3ZM9 20h6a3 3 0 0 1-6 0Z" /></svg></HeaderAction>
           <HeaderAction label="아기 정보" onClick={() => setPanel('baby')}><BabyIcon /></HeaderAction>
         </div>

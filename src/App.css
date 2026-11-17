@@ -2,6 +2,7 @@
   font-family: "BabiAggro";
   src: url("/auth/aggro-medium.woff") format("woff");
   font-weight: 500;
+  font-style: normal;
   font-display: swap;
 }
 
@@ -11,9 +12,57 @@
   letter-spacing: 0;
 }
 
+:root {
+  --page-title-offset: 40px;
+  --page-title-gap: 24px;
+}
+
+@media (max-height: 760px) {
+  :root {
+    --page-title-offset: 24px;
+    --page-title-gap: 16px;
+  }
+}
+
+.page-title {
+  margin: 0;
+  color: #101010;
+  font-family: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 31px;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
 .page-title-header {
   flex-shrink: 0;
   padding-top: max(60px, calc(env(safe-area-inset-top, 0px) + 12px));
+  padding-bottom: 20px;
+}
+
+[data-header-preview] .page-title-header {
+  padding-top: var(--page-title-offset);
+}
+
+[data-header-preview] .page-title-header {
+  padding-bottom: var(--page-title-gap);
+}
+
+.page-content-start {
+  padding-top: 32px;
+}
+
+[data-header-preview] .record-main:not(.record-add) {
+  padding-top: 32px;
+}
+
+[data-header-preview] .record-filters {
+  margin-top: 0;
+}
+
+[data-header-preview]:has(.record-add) > [data-app-header] {
+  display: none;
 }
 
 html,

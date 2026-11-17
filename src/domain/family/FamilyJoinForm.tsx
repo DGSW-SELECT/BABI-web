@@ -1,18 +1,22 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { acceptInvitation, checkInvitation, type Baby } from "./family-api";
 
-export default function FamilyJoinForm({ token, onJoined }: {
+export default function FamilyJoinForm({ token, onJoined, initialCode = "", expanded = false }: {
+  initialCode?: string;
+  expanded?: boolean;
   token: string;
   onJoined: (baby: Baby) => void;
 }) {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode);
   const [checked, setChecked] = useState<Baby | null>(null);
+  const busy = useRef(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
+    if (busy.current) return;
+    busy.current = true;
     setPending(true);
     setError("");
     try {
@@ -27,12 +31,13 @@ export default function FamilyJoinForm({ token, onJoined }: {
       setError(error instanceof Error ? error.message : "초대를 확인하지 못했어요.");
       setChecked(null);
     } finally {
+      busy.current = false;
       setPending(false);
     }
   }
 
   return (
-    <details className="mt-5 rounded-[13px] border border-[#d7d7d7] bg-white p-4 text-sm">
+    <details open={expanded || undefined} className="mt-5 rounded-[13px] border border-[#d7d7d7] bg-white p-4 text-sm">
       <summary className="cursor-pointer">초대 코드로 참여하기</summary>
       <form className="mt-3 space-y-3" onSubmit={submit}>
         <label className="block">초대 코드

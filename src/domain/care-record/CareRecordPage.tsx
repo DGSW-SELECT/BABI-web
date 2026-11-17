@@ -184,8 +184,8 @@ export default function CareRecordPage({
 
   return (
     <div className="record-app relative w-full bg-[#f8f9fa]">
-      <main className={adding ? "record-main record-add" : "record-main"}>
-        <header className="record-header">
+      <main aria-label={adding ? "기록 추가" : "기록관리"} className={adding ? "record-main record-add" : "record-main"}>
+        {adding && <header className="record-header">
           {adding && (
             <button
               className="record-close"
@@ -200,8 +200,8 @@ export default function CareRecordPage({
               <img src={asset("close")} alt="" />
             </button>
           )}
-          <h1>{adding ? "기록 추가" : "기록관리"}</h1>
-        </header>
+          <h1>기록 추가</h1>
+        </header>}
         <p className="sr-only">
           {demoBaby.name}의 공동 기록 · 모든 보호자의 기록을 함께 조회합니다.
         </p>
@@ -293,22 +293,38 @@ export default function CareRecordPage({
           </>
         ) : (
           <>
-            <nav className="record-filters" aria-label="기록 필터">
+            <nav
+              className="record-category-tabs record-filters"
+              aria-label="기록 필터"
+            >
               {(["전체", "수유", "수면", "체온", "울음"] as const).map(
-                (item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={filter === item}
-                    className={filter === item ? "selected" : ""}
-                    onClick={() => {
-                      setFilter(item);
-                      scrollRef.current?.scrollTo({ top: 0 });
-                    }}
-                  >
-                    {item}
-                  </button>
-                ),
+                (item) => {
+                  const categoryStyle = categories.find(
+                    ({ name }) => name === item,
+                  );
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      aria-pressed={filter === item}
+                      className={filter === item ? "selected" : ""}
+                      style={
+                        {
+                          "--category-color": categoryStyle?.color ?? "#52677d",
+                        } as CSSProperties
+                      }
+                      onClick={() => {
+                        setFilter(item);
+                        scrollRef.current?.scrollTo({ top: 0 });
+                      }}
+                    >
+                      {categoryStyle && (
+                        <img src={asset(categoryStyle.icon)} alt="" />
+                      )}
+                      <span>{item}</span>
+                    </button>
+                  );
+                },
               )}
             </nav>
             <div

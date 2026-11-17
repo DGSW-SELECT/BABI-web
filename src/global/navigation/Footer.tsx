@@ -154,8 +154,8 @@ export default function Footer() {
   let activeTab: FooterTab | null = null;
   if (pathname === "/voice-record") activeTab = "홈";
   if (pathname === "/care-record") activeTab = "기록";
-  if (pathname === "/mypage") activeTab = "마이페이지";
-  if (pathname === "/ai-report") activeTab = "AI";
+  if (pathname === "/family") activeTab = "마이페이지";
+  if (pathname === "/ai-report" || pathname.startsWith("/ai-report/")) activeTab = "AI";
   if (
     pathname === "/schedule" || pathname.startsWith("/schedule/") ||
     pathname === "/growth" || pathname.startsWith("/growth/") ||
@@ -166,7 +166,7 @@ export default function Footer() {
   function changeTab(tab: FooterTab) {
     if (tab === "홈") navigate("/voice-record");
     if (tab === "기록") navigate("/care-record");
-    if (tab === "마이페이지") navigate("/mypage");
+    if (tab === "마이페이지") navigate("/family");
     if (tab === "AI") navigate("/ai-report");
     if (tab === "캘린더") navigate("/schedule");
   }

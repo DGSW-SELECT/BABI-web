@@ -106,12 +106,12 @@
 .family-member-close span:last-child { transform: rotate(-45deg); }
 .family-member-form {
   position: absolute;
-  top: 93px;
+  top: 174px;
   left: 50%;
   display: flex;
   width: calc(100% - 78px);
   max-width: 324px;
-  height: 304px;
+  height: 223px;
   flex-direction: column;
   justify-content: space-between;
   transform: translateX(-50%);

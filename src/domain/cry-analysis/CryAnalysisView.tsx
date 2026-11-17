@@ -27,7 +27,7 @@ export default function CryAnalysisView() {
   }, []);
 
   // 짧은 울음소리 분석이므로 5초 후 자동 종료
-  const { start, error } = useRecorder({ onStop: handleStop, maxMs: 5000 });
+  const { start, error } = useRecorder({ onStop: handleStop, onError: () => setStep("idle"), maxMs: 5000 });
 
   const onMic = async () => {
     if (step !== "idle") return;

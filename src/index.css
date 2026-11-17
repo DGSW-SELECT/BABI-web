@@ -1,6 +1,15 @@
 @import "tailwindcss";
+@source "./";
 
 @layer base {
+  * {
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
   html {
     font-family: Pretendard, "Noto Sans KR", system-ui, sans-serif;
     background: #ffffff;

@@ -75,3 +75,37 @@ export const aiReportNotifications: HeaderNotification[] = [
   { id: 'welcome', title: 'BABI와 함께 기록을 시작해요', timeLabel: '어제 09:00', isRead: true,
     body: '하루의 기록을 차곡차곡 남기고 가족과 함께 확인해보세요. 기록을 모아 한눈에 살펴볼 수 있도록 도와드릴게요.' },
 ]
+
+type AiReportHistoryItem = {
+  id: string
+  caregiverName: string
+  startedAt: string
+  endedAt: string
+  summary: string
+  comment: string
+  items: AiReportItem[]
+}
+
+// 인수인계 단위 화면용 예시. 날짜별 CRUD API에는 저장하지 않는다.
+export const aiReportHistory: AiReportHistoryItem[] = [{
+  id: 'handoff-example-1',
+  caregiverName: '엄마',
+  startedAt: `${aiReportDate}T09:00:00+09:00`,
+  endedAt: `${aiReportDate}T13:30:00+09:00`,
+  summary: '이번 돌봄 중 수유는 2회, 총 240ml를 기록했어요. 마지막 수유는 12:30에 120ml를 먹었어요.\n\n10:00부터 11:30까지 1시간 30분 동안 잠들었어요.\n\n11:40에 측정한 체온은 36.5℃이고, 울음은 2회, 총 8분을 기록했어요.',
+  comment: '이번 돌봄의 수유와 수면을\n한눈에 확인해보세요!',
+  items: [
+    { type: 'sleep', name: '수면', value: '1시간 30분', description: '최장 1시간 30분', detail: '돌봄 중 기록한 수면 시간이에요.',
+      feedback: '10:00부터 11:30까지 1시간 30분 동안 잠들었어요.',
+      records: [{ time: '10:00–11:30', value: '1시간 30분' }] },
+    { type: 'feeding', name: '수유', value: '240ml', description: '총 240ml', detail: '돌봄 중 기록한 수유량이에요.',
+      feedback: '수유는 2회, 총 240ml예요. 마지막 수유는 12:30에 120ml를 먹었어요.',
+      records: [{ time: '09:30', value: '120ml' }, { time: '12:30', value: '120ml' }] },
+    { type: 'temperature', name: '체온', value: '36.5도', description: '측정 1회', detail: '이 돌봄 구간의 측정값이에요.',
+      feedback: '11:40에 체온 36.5도를 기록했어요.',
+      records: [{ time: '11:40', value: '36.5도' }] },
+    { type: 'crying', name: '울음', value: '8분', description: '총 8분', detail: '돌봄 중 기록한 울음 시간을 더했어요.',
+      feedback: '울음은 2회, 총 8분을 기록했어요.',
+      records: [{ time: '09:10', value: '3분' }, { time: '12:10', value: '5분' }] },
+  ],
+}]

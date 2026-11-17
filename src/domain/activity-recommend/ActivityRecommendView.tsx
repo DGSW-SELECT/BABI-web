@@ -16,7 +16,7 @@ export default function ActivityRecommendView({ onStartActivity }: Props) {
   useEffect(() => {
     let alive = true;
     fetchRecommendations(page)
-      .then((d) => alive && setData(d))
+      .then((d) => { if (alive) { setData(d); setApiError(null); } })
       .catch((e) => alive && setApiError(e instanceof Error ? e.message : "문제가 생겼어요. 다시 시도해주세요."));
     return () => { alive = false; };
   }, [page, retry]);
@@ -42,6 +42,10 @@ export default function ActivityRecommendView({ onStartActivity }: Props) {
     <section className="babi-screen babi-screen--wide babi-screen--left babi-screen--activity">
       <h2 className="babi-title-left">오늘 지민이에게<br />이런 활동은 어때요?</h2>
       <p className="babi-hint">{data.ageLabel} · 오늘 기록을 바탕으로 추천했어요</p>
+      {apiError && <div className="babi-card">
+        <p className="babi-error" role="alert">{apiError}</p>
+        <button className="babi-btn babi-btn--grey" onClick={() => { setApiError(null); setRetry((n) => n + 1); }}>다시 시도</button>
+      </div>}
 
       <div className="babi-stats">
         <div className="babi-stat babi-stat--feeding">수유<b>{c.feeding}</b></div>

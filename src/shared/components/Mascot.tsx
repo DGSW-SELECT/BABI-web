@@ -3,12 +3,12 @@ interface Props {
   className?: string;
 }
 
-/** 고해상도 BABI 코끼리 마스코트 */
+/** BABI 코끼리 마스코트. 이미지를 교체하려면 src/shared/assets/babi-mascot.png 파일만 바꾸세요. */
 export default function Mascot({ size = 180, className = "" }: Props) {
   return (
     <img
       className={`babi-mascot ${className}`}
-      src="/auth/mascot.png"
+      src="/ai-report-mascot.svg"
       style={{ width: size }}
       alt="BABI 마스코트"
     />
