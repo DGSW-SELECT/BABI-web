@@ -263,7 +263,7 @@ function AppLayout() {
           <Route path="/family/manage" element={<FamilyAccountManagement token={token} onBabyChange={selectBaby} selectedBabyId={selectedBabyId ?? myPageData?.baby.babyId} />} />
           <Route
             path="/care-record"
-            element={<CareRecordPage onFinishEditing={finishEditing} />}
+            element={<CareRecordPage key={myPageData?.baby.babyId ?? "no-baby"} babyId={myPageData?.baby.babyId ?? null} babyName={myPageData?.baby.name} onFinishEditing={finishEditing} />}
           />
           <Route
             path="/schedule"

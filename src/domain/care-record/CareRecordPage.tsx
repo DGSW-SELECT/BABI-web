@@ -1,12 +1,7 @@
-import { useRef, useState, type CSSProperties } from "react";
-import { demoBaby, demoCaregivers } from "./care-record-data";
-import type { Category, CareRecordInput } from "./care-record-data";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { CareRecord, Category } from "./care-record-data";
+import { createCareRecord, listCareRecords, recordDateKey } from "./care-record-api";
 import {
-  saveSharedCareRecord,
-  useSharedCareRecords,
-} from "./care-record-store";
-import {
-  formatRecordDate,
   getRecordDateLabel,
   parseRecordDate,
 } from "./record-date";
@@ -49,9 +44,13 @@ const fieldSettings = {
 function RecordForm({
   category,
   onSave,
+  pending,
+  dateKey,
 }: {
   category: Category;
-  onSave: (record: CareRecordInput) => void;
+  onSave: (date: Date, selection: string, value: string, memo: string) => void;
+  pending: boolean;
+  dateKey: string;
 }) {
   const settings = fieldSettings[category];
   return (
@@ -74,32 +73,7 @@ function RecordForm({
           dateInput.reportValidity();
           return;
         }
-        onSave({
-          id: crypto.randomUUID(),
-          date: formatRecordDate(date),
-          category,
-          title:
-            category === "수유" || category === "수면"
-              ? `${category} (${selection})`
-              : category,
-          value: category === "울음" ? selection : value,
-          time: new Intl.DateTimeFormat("ko-KR", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          }).format(new Date()),
-          note: [
-            category === "울음"
-              ? `${value} 동안`
-              : category === "체온"
-                ? `측정 ${selection}`
-                : "",
-            memo,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-          icon: categories.find((item) => item.name === category)!.icon,
-        });
+        onSave(date, selection, value, memo);
       }}
     >
       <label className="record-field">
@@ -119,7 +93,7 @@ function RecordForm({
           required
           aria-label="날짜"
           type="text"
-          defaultValue={formatRecordDate(new Date())}
+          defaultValue={dateKey}
           placeholder="YYYY. MM. DD"
           onInput={(event) => event.currentTarget.setCustomValidity("")}
         />
@@ -146,10 +120,11 @@ function RecordForm({
       </label>
       <button
         className="record-save"
+        disabled={pending}
         type="submit"
         onPointerDown={(event) => event.preventDefault()}
       >
-        기록저장
+        {pending ? "저장 중…" : "기록저장"}
       </button>
     </form>
   );
@@ -157,20 +132,41 @@ function RecordForm({
 
 export default function CareRecordPage({
   onFinishEditing,
+  babyId,
+  babyName,
 }: {
   onFinishEditing: () => void;
+  babyId: number | null;
+  babyName?: string;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const records = useSharedCareRecords();
+  const [records, setRecords] = useState<CareRecord[]>([]);
+  const [dateKey, setDateKey] = useState(() => recordDateKey(new Date()));
+  const [revision, setRevision] = useState(0);
+  const [listError, setListError] = useState("");
+  const [loading, setLoading] = useState(Boolean(babyId));
+  const [pending, setPending] = useState(false);
+  const saving = useRef(false);
+
+  useEffect(() => {
+    if (!babyId || !dateKey) return;
+    const controller = new AbortController();
+    listCareRecords(babyId, dateKey, controller.signal)
+      .then((items) => { if (!controller.signal.aborted) setRecords(items); })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) setListError(error instanceof Error ? error.message : "기록을 불러오지 못했어요.");
+      })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [babyId, dateKey, revision]);
   const [saveError, setSaveError] = useState("");
-  const caregiver = demoCaregivers[0];
   const [filter, setFilter] = useState<Category | "전체">("전체");
   const [adding, setAdding] = useState(false);
   const [category, setCategory] = useState<Category>("수유");
   const visibleRecords = records
     .filter(
       (record) =>
-        record.babyId === demoBaby.babyId &&
+        record.babyId === babyId &&
         (filter === "전체" || record.category === filter),
     )
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
@@ -203,7 +199,7 @@ export default function CareRecordPage({
           <h1>기록 추가</h1>
         </header>}
         <p className="sr-only">
-          {demoBaby.name}의 공동 기록 · 모든 보호자의 기록을 함께 조회합니다.
+          {babyName ?? "아기 선택"}의 공동 기록 · 모든 보호자의 기록을 함께 조회합니다.
         </p>
         {saveError && (
           <p role="alert" className="record-save-error">
@@ -268,22 +264,28 @@ export default function CareRecordPage({
                 <div key={item.name} hidden={category !== item.name}>
                   <RecordForm
                     category={item.name}
-                    onSave={(record) => {
+                    dateKey={dateKey}
+                    pending={pending || !babyId}
+                    onSave={async (date, selection, value, memo) => {
+                      if (!babyId || saving.current) return;
+                      saving.current = true;
+                      setPending(true);
+                      setSaveError("");
                       try {
-                        saveSharedCareRecord({
-                          ...record,
-                          babyId: demoBaby.babyId,
-                          authorId: caregiver.id,
-                          createdAt: new Date().toISOString(),
-                        });
+                        await createCareRecord(babyId, item.name, date, selection, value, memo);
+                        setDateKey(recordDateKey(date));
+                        setRecords([]);
+                        setLoading(true);
+                        setListError("");
+                        setRevision((previous) => previous + 1);
                         onFinishEditing();
                         setFilter("전체");
                         setAdding(false);
-                        setSaveError("");
-                      } catch {
-                        setSaveError(
-                          "기록을 저장하지 못했어요. 입력 내용을 확인한 뒤 다시 시도해주세요. 입력한 내용은 유지돼요.",
-                        );
+                      } catch (error) {
+                        setSaveError(error instanceof Error ? error.message : "기록을 저장하지 못했어요.");
+                      } finally {
+                        saving.current = false;
+                        setPending(false);
                       }
                     }}
                   />
@@ -293,6 +295,20 @@ export default function CareRecordPage({
           </>
         ) : (
           <>
+            <label className="record-field">
+              조회 날짜
+              <input type="date" value={dateKey} onChange={(event) => {
+                const next = event.currentTarget.value;
+                if (!next || next === dateKey) return;
+                setRecords([]);
+                setListError("");
+                setLoading(Boolean(babyId));
+                setDateKey(next);
+              }} />
+            </label>
+            {!babyId && <p role="status">로그인하고 아기를 등록하거나 선택해주세요.</p>}
+            {loading && <p role="status">기록을 불러오는 중이에요.</p>}
+            {listError && <p role="alert">{listError}</p>}
             <nav
               className="record-category-tabs record-filters"
               aria-label="기록 필터"
@@ -377,9 +393,7 @@ export default function CareRecordPage({
                                 <p>{record.value}</p>
                                 <p className="record-card-author">
                                   작성자 ·{" "}
-                                  {demoCaregivers.find(
-                                    (member) => member.id === record.authorId,
-                                  )?.name ?? "보호자"}
+                                  {record.authorName || "보호자"}
                                 </p>
                                 {record.note && (
                                   <p className="record-card-note">
