@@ -3,6 +3,7 @@ export type CareRecord = {
   id: string;
   babyId: number;
   authorId: string;
+  authorName?: string;
   createdAt: string;
   date: string;
   category: Category;

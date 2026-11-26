@@ -3,46 +3,6 @@ import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { sendSignupVerification, signup as signupAccount, verifySignupEmail } from "../../global/api/auth";
 
-function GoogleLogo() {
-  const parts = [
-    { left: 3.11, top: 4.83, width: 14.33, height: 10.83 },
-    { left: 14.26, top: 3.13, width: 19.2, height: 10.19 },
-    { left: 6.04, top: 1.84, width: 19.14, height: 8.76 },
-    { left: 10.4, top: -1.46, width: 19.14, height: 8.76 },
-    { left: 4.11, top: 4.77, width: 21.38, height: 10.22 },
-    { left: 9.28, top: -0.99, width: 12.47, height: 10.03 },
-  ];
-  return (
-    <span
-      aria-hidden="true"
-      className="relative inline-block h-5 w-5 shrink-0 overflow-hidden"
-      style={{
-        maskImage: "url(/auth/google-mask.svg)",
-        maskSize: "20px 20px",
-        maskRepeat: "no-repeat",
-      }}
-    >
-      <img
-        src="/auth/google-base.png"
-        width="26.299"
-        height="25.772"
-        alt=""
-        className="absolute max-w-none"
-        style={{ left: -2.8, top: -3.09 }}
-      />
-      {parts.map((part, index) => (
-        <img
-          key={index}
-          src={`/auth/google-${index}.svg`}
-          alt=""
-          className="absolute max-w-none"
-          style={part}
-        />
-      ))}
-    </span>
-  );
-}
-
 function Field({
   label,
   name,
@@ -395,33 +355,6 @@ export default function AuthView({ onLogin }: { onLogin: (email: string, passwor
           </div>
         )}
       </form>
-      {!signup && (
-        <div className="mt-16">
-          <div className="mx-[22px] flex items-center gap-5 text-[14px] leading-[17px] text-[#868282]">
-            <span className="h-px flex-1 bg-[#999]" />
-            또는
-            <span className="h-px flex-1 bg-[#999]" />
-          </div>
-          <div className="mx-auto mt-8 flex w-[81.1%] flex-col gap-[15px]">
-            <button
-              type="button"
-              disabled
-              className="flex h-[54px] items-center justify-center gap-[15px] rounded bg-[#03c75a] text-[18px] text-white hover:brightness-95"
-            >
-              <img src="/auth/naver.svg" width="16" height="16" alt="" />
-              네이버 계정으로 로그인
-            </button>
-            <button
-              type="button"
-              disabled
-              className="flex h-[54px] items-center justify-center gap-2 rounded border border-[#999] bg-white text-[18px] font-medium hover:bg-slate-50"
-            >
-              <GoogleLogo />
-              Google 계정으로 로그인
-            </button>
-          </div>
-        </div>
-      )}
       {signup && verificationOpen && (
         <Verification
           email={verificationEmail}
