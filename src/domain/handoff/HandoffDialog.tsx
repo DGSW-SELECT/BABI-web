@@ -2,14 +2,13 @@ import { useEffect, useId, useRef, useState } from 'react'
 import HandoffPage from './HandoffPage'
 
 type HandoffDialogProps = {
-  memo: string
-  onSave: (memo: string) => void
+  babyId?: number
   onClose: () => void
   height: number
   offsetTop: number
 }
 
-export default function HandoffDialog({ memo, onSave, onClose, height, offsetTop }: HandoffDialogProps) {
+export default function HandoffDialog({ babyId, onClose, height, offsetTop }: HandoffDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [mode, setMode] = useState<'check' | 'send' | null>(null)
   const titleId = useId()
@@ -36,7 +35,7 @@ export default function HandoffDialog({ memo, onSave, onClose, height, offsetTop
       }}
       style={mode ? { top: offsetTop, height: height || '100dvh' } : undefined}
       className={`fixed overflow-hidden border-0 bg-white p-0 text-[#121212] shadow-xl outline-none backdrop:bg-black/60 ${mode ? 'inset-x-0 m-0 mx-auto max-h-none w-full max-w-[402px] rounded-none' : 'inset-0 m-auto w-[calc(100%_-_32px)] max-w-[310px] rounded-2xl'}`}>
-      {mode ? <HandoffPage key={mode} mode={mode} memo={memo} onSave={onSave} onClose={onClose} /> : <>
+      {mode ? <HandoffPage key={`${mode}:${babyId}`} mode={mode} babyId={babyId} onClose={onClose} /> : <>
         <div className="relative px-5 pt-7 pb-4 text-center">
           <button type="button" onClick={onClose} aria-label="인수인계 닫기"
             className="absolute top-1 right-1 flex size-8 cursor-pointer items-center justify-center rounded-full text-lg text-[#68777e] hover:bg-[#f3f6f7] focus-visible:outline-2 focus-visible:outline-[#399fff]">×</button>
