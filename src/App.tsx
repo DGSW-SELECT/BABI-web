@@ -86,6 +86,7 @@ function AppLayout() {
   const [schedules, setSchedules] = useState<Schedule[]>(createSchedules);
   const [selectedDate, setSelectedDate] = useState(getDateKey);
   const [showHandoff, setShowHandoff] = useState(false);
+  const [handoffMemo, setHandoffMemo] = useState("");
   const [myPageData, setMyPageData] = useState<MyPageData | null>(null);
   const [babies, setBabies] = useState<Baby[]>([]);
   const [selectedBabyId, setSelectedBabyId] = useState<number | null>(() => { const id = Number(new URLSearchParams(search).get("babyId")); return Number.isSafeInteger(id) && id > 0 ? id : null; });
@@ -228,6 +229,11 @@ function AppLayout() {
     setShowHandoff(false);
   }
 
+  function saveHandoff(memo: string) {
+    setHandoffMemo(memo);
+    closeHandoff();
+  }
+
   return (
     <div
       ref={containerRef}
@@ -354,7 +360,8 @@ function AppLayout() {
       )}
       {showHandoff && (
         <HandoffDialog
-          babyId={userId === null ? undefined : myPageData?.baby.babyId ?? babies.find((baby) => baby.babyId === selectedBabyId)?.babyId}
+          memo={handoffMemo}
+          onSave={saveHandoff}
           onClose={closeHandoff}
           height={height}
           offsetTop={offsetTop}
