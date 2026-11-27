@@ -17,7 +17,7 @@ export type DailyReport = {
 export type DailyReportInput = { reportDate: string; summary: string }
 
 // 배포 Swagger의 날짜별 CRUD다. 돌봄 구간별 AI 생성 API로 취급하지 않는다.
-const reportPath = (babyId: number) => `/babi/api/babies/${babyId}/daily-reports`
+const reportPath = (babyId: number) => `/babies/${babyId}/daily-reports`
 
 export function createDailyReport(babyId: number, input: DailyReportInput) {
   return request<DailyReport>(reportPath(babyId), {
@@ -37,4 +37,8 @@ export function updateDailyReport(babyId: number, date: string, summary: string)
 
 export function deleteDailyReport(babyId: number, date: string) {
   return request<null>(`${reportPath(babyId)}/${encodeURIComponent(date)}`, { method: 'DELETE' })
+}
+
+export function generateDailyReport(babyId: number, date: string) {
+  return request<DailyReport>(`${reportPath(babyId)}/${encodeURIComponent(date)}/generate`, { method: 'POST' })
 }

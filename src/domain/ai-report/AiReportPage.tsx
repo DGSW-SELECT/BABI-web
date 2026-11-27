@@ -1,8 +1,63 @@
-import { Link } from 'react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { ApiError } from '../../global/api/sessionClient'
+import { getDailyReport } from './aiReportApi'
+import { listCareRecords, recordDateKey } from '../care-record/care-record-api'
+import type { CareRecord } from '../care-record/care-record-data'
 import Modal from '../../shared/components/Modal'
 import { aiReportBaby, aiReportComment, aiReportData, aiReportDate } from './aiReportData'
 import type { AiReportItem, AiReportType } from './aiReportData'
+
+function sleepMinutes(record: CareRecord): number | null {
+  const candidates = [record.value, ...(record.note?.split(' · ').slice(1, 2) ?? [])]
+  for (const candidate of candidates) {
+    const match = candidate.trim().match(/^(?:(\d+)\s*시간)?\s*(?:(\d+)\s*분)?$/)
+    if (match && (match[1] !== undefined || match[2] !== undefined)) return Number(match[1] ?? 0) * 60 + Number(match[2] ?? 0)
+    const range = candidate.trim().match(/^(오전|오후)?\s*(\d{1,2}):(\d{2})\s*[~～]\s*(오전|오후)?\s*(\d{1,2}):(\d{2})$/)
+    if (range) {
+      const toMinutes = (period: string | undefined, hour: string, minute: string) => {
+        const h = Number(hour), m = Number(minute)
+        if (m > 59 || h > 23 || (period && (h < 1 || h > 12))) return null
+        return (period ? h % 12 + (period === '오후' ? 12 : 0) : h) * 60 + m
+      }
+      const start = toMinutes(range[1], range[2], range[3])
+      const end = toMinutes(range[4] || range[1], range[5], range[6])
+      if (start !== null && end !== null && end > start) return end - start
+    }
+  }
+  return null
+}
+
+function formatMinutes(minutes: number) {
+  const hours = Math.floor(minutes / 60)
+  const remaining = minutes % 60
+  return [hours ? `${hours}시간` : '', remaining || !hours ? `${remaining}분` : ''].filter(Boolean).join(' ')
+}
+
+function reportItems(records: CareRecord[], status: string): AiReportItem[] {
+  return aiReportData.map((item) => {
+    const entries = records.filter((record) => record.category === item.name)
+    const values = entries.map((record) => Number.parseFloat(record.value)).filter(Number.isFinite)
+    let value = '—'
+    let description = entries.length ? `오늘 기록 ${entries.length}회` : status
+    if (item.type === 'feeding' && values.length) {
+      value = `${values.reduce((total, n) => total + n, 0)}ml`
+      description = `총 ${value}`
+    } else if (item.type === 'temperature' && values.length) {
+      value = `${(values.reduce((total, n) => total + n, 0) / values.length).toFixed(1)}도`
+    } else if (item.type === 'sleep' && entries.length) {
+      const durations = entries.map(sleepMinutes)
+      const known = durations.filter((duration): duration is number => duration !== null)
+      if (known.length) {
+        value = formatMinutes(known.reduce((total, duration) => total + duration, 0))
+        description = known.length === durations.length ? `최장 ${formatMinutes(Math.max(...known))}` : '확인 가능한 시간만 합산'
+      } else {
+        description = '일부 수면 시간을 확인할 수 없어요.'
+      }
+    }
+    return { ...item, value, description, detail: description, feedback: entries.length ? `오늘 ${item.name} 기록 ${entries.length}회가 있어요.` : status,
+      records: entries.map((record) => ({ time: record.time, value: item.type === 'sleep' && sleepMinutes(record) !== null ? formatMinutes(sleepMinutes(record)!) : record.value || '기록됨', memo: record.note })) }
+  })
+}
 
 const cardColors = {
   sleep: 'border-[#a783ff] bg-[#f0edf8] text-[#a783ff]',
@@ -18,11 +73,40 @@ type AiReportPageProps = {
   comment?: string
   period?: string
   onBack?: () => void
+  babyId?: number
 }
 
-export default function AiReportPage({ items = aiReportData, babyName = aiReportBaby.name, date = aiReportDate, comment = aiReportComment, period, onBack }: AiReportPageProps = {}) {
+export default function AiReportPage({ items = aiReportData, babyName = aiReportBaby.name, date = aiReportDate, comment = aiReportComment, period, onBack, babyId }: AiReportPageProps = {}) {
+  const [careRecords, setCareRecords] = useState<CareRecord[]>([])
+  const [recordsStatus, setRecordsStatus] = useState('기록을 불러오는 중이에요.')
+  const [summary, setSummary] = useState('')
+  const [missing, setMissing] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    if (onBack || babyId === undefined) return
+    const controller = new AbortController()
+    listCareRecords(babyId, date, controller.signal).then((records) => {
+      if (!controller.signal.aborted) { setCareRecords(records.filter((record) => recordDateKey(new Date(record.createdAt)) === date)); setRecordsStatus('기록이 없어요.') }
+    }).catch(() => {
+      if (!controller.signal.aborted) setRecordsStatus('기록을 불러오지 못했어요.')
+    })
+    return () => controller.abort()
+  }, [babyId, date, onBack])
+  useEffect(() => {
+    if (onBack || babyId === undefined) return
+    let cancelled = false
+    getDailyReport(babyId, date).then((report) => {
+      if (!cancelled) setSummary(report.summary)
+    }).catch((failure: unknown) => {
+      if (cancelled) return
+      if (failure instanceof ApiError && failure.status === 404) setMissing(true)
+      else setError(failure instanceof Error ? failure.message : '리포트를 불러오지 못했어요.')
+    })
+    return () => { cancelled = true }
+  }, [babyId, date, onBack])
   const [selectedType, setSelectedType] = useState<AiReportType | null>(null)
-  const selectedReport = items.find((report) => report.type === selectedType)
+  const displayedItems = onBack ? items : reportItems(careRecords, babyId === undefined ? '로그인 후 확인해주세요.' : recordsStatus)
+  const selectedReport = displayedItems.find((report) => report.type === selectedType)
 
   return (
     <main aria-label={`${babyName} ${period ?? date} AI 육아 리포트`} className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f7f8f9] text-[#101010]">
@@ -35,16 +119,15 @@ export default function AiReportPage({ items = aiReportData, babyName = aiReport
         </div>
         {period && <p className="mt-2 text-center text-xs leading-5 text-[#78848f]">{period}</p>}
         <div className="mt-[var(--page-title-gap)] grid grid-cols-2 gap-x-[14px] gap-y-5">
-          {items.map((report) => <AiReportCard key={report.type} report={report} onClick={() => setSelectedType(report.type)} />)}
+          {displayedItems.map((report) => <AiReportCard key={report.type} report={report} onClick={() => setSelectedType(report.type)} />)}
         </div>
         <section aria-label="BABI의 한마디" className="mt-7 grid min-h-[145px] grid-cols-[minmax(0,1fr)_96px] items-center gap-4 rounded-[17px] border border-[#d6d6d6] bg-white px-4 py-4 max-[360px]:grid-cols-[minmax(0,1fr)_76px] max-[360px]:gap-3 max-[360px]:px-3">
           <div className="min-w-0">
             <h2 className="text-center text-base leading-6 font-medium text-[#399fff] max-[360px]:text-sm">BABI의 한마디</h2>
-            <p className="relative mt-2 rounded-[32px] bg-[#f7f8f9] px-3 py-2 text-center text-xs leading-6 whitespace-pre-line break-keep after:absolute after:top-1/2 after:-right-2 after:-translate-y-1/2 after:border-y-[7px] after:border-l-[12px] after:border-y-transparent after:border-l-[#f7f8f9] max-[360px]:px-2 max-[360px]:text-[11px] max-[360px]:leading-5">{comment}</p>
+            <p className="relative mt-2 rounded-[32px] bg-[#f7f8f9] px-3 py-2 text-center text-xs leading-6 whitespace-pre-line break-keep after:absolute after:top-1/2 after:-right-2 after:-translate-y-1/2 after:border-y-[7px] after:border-l-[12px] after:border-y-transparent after:border-l-[#f7f8f9] max-[360px]:px-2 max-[360px]:text-[11px] max-[360px]:leading-5">{onBack ? comment : summary || (babyId === undefined ? '로그인한 뒤 아기를 선택해주세요.' : missing ? '이 날짜의 리포트가 없어요.' : error || '리포트를 불러오는 중이에요.')}</p>
           </div>
           <img src="/ai-report-mascot.svg" alt="BABI 코끼리 캐릭터" width="96" height="115" className="h-[115px] w-full object-contain max-[360px]:h-24" />
         </section>
-        {!onBack && <Link to="/ai-report/records" className="mt-4 block py-2 text-center text-xs text-[#7895bb] underline underline-offset-4">리포트 기록 보기</Link>}
       </div>
       {selectedReport && <AiReportDetailModal report={selectedReport} subtitle={`${babyName} · ${period ?? date.replaceAll('-', '. ')}`} timelineLabel={period ?? date.replaceAll('-', '. ')} onClose={() => setSelectedType(null)} />}
     </main>
@@ -53,7 +136,7 @@ export default function AiReportPage({ items = aiReportData, babyName = aiReport
 
 function AiReportCard({ report, onClick }: { report: AiReportItem; onClick: () => void }) {
   let value = report.value
-  if (report.type === 'feeding' || report.type === 'crying') value = `${report.records.length}회`
+  if ((report.type === 'feeding' || report.type === 'crying') && report.records.length) value = `${report.records.length}회`
 
   return (
     <article aria-label={`${report.name} 요약`} className="min-w-0">

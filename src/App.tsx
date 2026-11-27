@@ -250,7 +250,7 @@ function AppLayout() {
           <Route path="/voice-record" element={<VoiceRecordView />} />
           <Route path="/activity-recommend" element={<ActivityRecommendView />} />
           <Route path="/cry-analysis" element={<CryAnalysisView />} />
-          <Route path="/ai-report" element={<AiReportPage />} />
+          <Route path="/ai-report" element={<AiReportPage key={myPageData?.baby.babyId ?? selectedBabyId ?? "no-baby"} babyId={userId === null ? undefined : myPageData?.baby.babyId ?? babies.find((baby) => baby.babyId === selectedBabyId)?.babyId} babyName={myPageData?.baby.name} />} />
           <Route path="/ai-report/records" element={<AiReportHistoryPage />} />
           <Route path="/family" element={<SessionBoundary><RequireSession><MyPage key={myPageData?.baby.babyId ?? "no-baby"} onGroupChanged={(left) => { if (left) setSelectedBabyId(null); reloadMyPage(); }} data={myPageData} userId={userId} email={email} loading={myPageLoading} error={myPageError} onRetry={reloadMyPage} onSaveBaby={saveBaby} onCreateBaby={registerBaby} /></RequireSession></SessionBoundary>} />
           <Route path="/family/integration" element={<Navigate to="/family/manage" replace />} />
