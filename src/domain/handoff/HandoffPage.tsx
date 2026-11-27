@@ -1,24 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { handoffBriefing, handoffCheckMessages, handoffRecords } from './handoffData'
+import { handoffCheckMessages, handoffRecords } from './handoffData'
+import { ApiError } from '../../global/api/sessionClient'
+import { createBriefing, createMemo, getLatestBriefing, getLatestMemo } from './api'
 import type { HandoffMessage } from './handoffData'
 
 type HandoffPageProps = {
   mode: 'check' | 'send'
-  memo: string
-  onSave: (memo: string) => void
+  babyId?: number
   onClose: () => void
 }
 
-export default function HandoffPage({ mode, memo, onSave, onClose }: HandoffPageProps) {
-  const isChecking = mode === 'check'
+export default function HandoffPage({ mode, babyId, onClose }: HandoffPageProps) {
+  const isChecking = mode === 'send'
   const titleRef = useRef<HTMLHeadingElement>(null)
   const chatRef = useRef<HTMLDivElement>(null)
   const [input, setInput] = useState('')
-  const [note, setNote] = useState(memo)
+  const [note, setNote] = useState('')
+  const [summary, setSummary] = useState<string | null>(null)
+  const [memo, setMemo] = useState('')
+  const [error, setError] = useState('')
+  const saving = useRef(false)
+  const briefingCreated = useRef(false)
   const [messages, setMessages] = useState<HandoffMessage[]>(() => isChecking ? handoffCheckMessages : [
     { sender: 'babi', texts: ['오늘 남겨진 돌봄 내용을 정리해서 전달드릴게요.'] },
-    { sender: 'babi', texts: handoffBriefing },
   ])
   const initialMessageCount = useRef(messages.length)
 
@@ -29,6 +34,22 @@ export default function HandoffPage({ mode, memo, onSave, onClose }: HandoffPage
     if (chat) chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' })
   }, [messages.length])
 
+  useEffect(() => {
+    if (babyId === undefined) return
+    const controller = new AbortController()
+    function handleError(failure: unknown) {
+      if (controller.signal.aborted || (failure instanceof ApiError && failure.status === 404)) return
+      setError(failure instanceof Error ? failure.message : '인수인계 정보를 불러오지 못했어요.')
+    }
+    void getLatestBriefing(babyId, controller.signal).then((briefing) => {
+      if (!controller.signal.aborted) setSummary(briefing?.summary ?? '')
+    }).catch(handleError)
+    void getLatestMemo(babyId, controller.signal).then((record) => {
+      if (!controller.signal.aborted) setMemo(record?.content ?? '')
+    }).catch(handleError)
+    return () => controller.abort()
+  }, [babyId])
+
   function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const text = input.trim()
@@ -37,14 +58,41 @@ export default function HandoffPage({ mode, memo, onSave, onClose }: HandoffPage
       { sender: 'me', texts: [text] },
       { sender: 'babi', texts: [isChecking
         ? '추가 메모에 반영했어요. 내용을 확인한 뒤 저장해주세요.'
-        : '돌봄 요약을 확인해보세요. 더 궁금한 내용이 있으면 알려주세요.'] },
+        : 'AI 답변은 아직 연결 전이에요. 지금은 아래 돌봄 요약과 전달 메모를 확인할 수 있어요.'] },
     ])
     if (isChecking) setNote((previous) => previous ? `${previous}\n${text}` : text)
     setInput('')
   }
 
-  function saveBriefing() {
-    onSave([note.trim(), input.trim()].filter(Boolean).join('\n'))
+  async function saveBriefing() {
+    if (saving.current) return
+    if (babyId === undefined) {
+      setError('로그인한 뒤 아기를 선택해주세요.')
+      return
+    }
+    const content = [note.trim(), input.trim()].filter(Boolean).join('\n')
+    if (content.length > 1000) {
+      setError('전달 메모는 1,000자까지 저장할 수 있어요.')
+      return
+    }
+    saving.current = true
+    setError('')
+    try {
+      if (!briefingCreated.current) {
+        const briefing = await createBriefing(babyId)
+        if (typeof briefing?.summary !== 'string' || !briefing.summary.trim()) {
+          throw new Error('서버에서 브리핑 내용을 받지 못했어요.')
+        }
+        briefingCreated.current = true
+        setSummary(briefing.summary)
+      }
+      if (content) await createMemo(babyId, content)
+      onClose()
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : '인수인계를 저장하지 못했어요.')
+    } finally {
+      saving.current = false
+    }
   }
 
   return (
@@ -59,6 +107,7 @@ export default function HandoffPage({ mode, memo, onSave, onClose }: HandoffPage
       <div ref={chatRef} data-input-scroll-container className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-4 pb-5 max-[360px]:px-4">
         <div role="log" aria-label="인수인계 대화" aria-live="polite" aria-relevant="additions" className="space-y-5">
           {messages.map((message, index) => <ChatMessage key={index} message={message} />)}
+          {!isChecking && summary && <ChatMessage message={{ sender: 'babi', texts: summary.split(/\r?\n/).filter(Boolean) }} />}
         </div>
         <section aria-label={isChecking ? '다음 보호자에게 남길 내용' : '전달받은 돌봄 요약'} className="mt-6 rounded-xl bg-[#eceefa] p-3">
           <h2 className="mb-3 flex items-center gap-2 text-xs font-medium text-[#625bd1]">
@@ -68,21 +117,21 @@ export default function HandoffPage({ mode, memo, onSave, onClose }: HandoffPage
             {isChecking ? '다음 보호자님이 확인할 내용' : '보호자님이 확인할 내용'}
           </h2>
           {isChecking ? <div className="rounded-xl bg-white px-4 py-3 text-xs leading-5 whitespace-pre-wrap wrap-anywhere">
-            <p>{handoffBriefing.join('\n')}</p>
+            <p>{summary || '아직 전달된 브리핑이 없어요.'}</p>
             {note && <p className="mt-3">{note}</p>}
           </div> : <>
             <div className="grid grid-cols-2 gap-2 rounded-xl bg-white p-2">
               {handoffRecords.map((record) => <article key={record.type} className={`min-w-0 rounded-xl border p-2 ${recordStyles[record.type]}`}>
                 <h3 className="flex flex-wrap items-center gap-1 text-[11px] font-medium">
-                  <CareIcon type={record.type} /><span>{record.name}</span><span>{record.value}</span>
+                  <CareIcon type={record.type} /><span>{record.name}</span>
                 </h3>
-                <p className="mt-2 text-[11px] leading-4 text-[#68727b]">{record.description}</p>
-                <p className="mt-1 text-[10px] leading-4 text-[#68727b]">{record.detail}</p>
+                <p className="mt-2 text-[11px] leading-4 text-[#68727b]">{summary?.split(/\r?\n/).find((line) => line.startsWith(record.name + ':') || line.startsWith(record.name + '：'))?.slice(record.name.length + 1).trim() || '요약에 항목 없음'}</p>
               </article>)}
             </div>
             {memo && <div className="mt-3 rounded-xl bg-white px-3 py-3 text-xs leading-5 whitespace-pre-wrap wrap-anywhere"><h3 className="mb-1 font-semibold">전달 메모</h3>{memo}</div>}
           </>}
         </section>
+        {error && <p role="alert" className="mt-3 text-xs">{error}</p>}
       </div>
       <div className="shrink-0 border-t border-[#e5e7eb] px-6 pt-3 pb-[max(16px,env(safe-area-inset-bottom))] max-[360px]:px-4">
         <form onSubmit={sendMessage} className="flex min-h-14 items-center gap-2 rounded-xl border border-[#b9b7ff] bg-[#eef0fb] py-1 pl-4 pr-1 focus-within:outline-2 focus-within:outline-[#8d8aff]">
